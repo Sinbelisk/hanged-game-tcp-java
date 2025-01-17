@@ -1,14 +1,18 @@
 package game;
 
+import util.SimpleLogger;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HangedGame {
     private static final String VOWEL_REGEX = "(?i)[aeiou]";
     private static final String CONSONANT_REGEX = "(?i)[b-df-hj-np-tv-z]";
+    private static final Logger log = SimpleLogger.getInstance().getLogger(HangedGame.class);
 
     private final Queue<String> currentCollection;
     private final HiddenSaying currentSaying;
