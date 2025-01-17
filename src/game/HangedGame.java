@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class HangedGame {
     private static final String VOWEL_REGEX = "(?i)[aeiou]";
     private static final String CONSONANT_REGEX = "(?i)[b-df-hj-np-tv-z]";
-    private static final Logger log = SimpleLogger.getInstance().getLogger(HangedGame.class);
+    private static final Logger logger = SimpleLogger.getInstance().getLogger(HangedGame.class);
 
     private final Queue<String> currentCollection;
     private final HiddenSaying currentSaying;
@@ -21,16 +21,20 @@ public class HangedGame {
     public HangedGame(Queue<String> collection){
         currentCollection = collection;
         currentSaying = new HiddenSaying(currentCollection.poll());
+        logger.info("HangedGame created");
     }
     public boolean tryConsonant(char consonant) {
+        logger.info("Trying consonant " + consonant);
         return tryCharacter(consonant, CONSONANT_REGEX);
     }
 
     public boolean tryVowel(char vowel) {
+        logger.info("Trying vowel " + vowel);
         return tryCharacter(vowel, VOWEL_REGEX);
     }
 
     public boolean tryPhrase(String phrase){
+        logger.info("Trying phrase " + phrase);
         return (phrase.trim().equalsIgnoreCase(currentSaying.getSaying().trim()));
     }
 
@@ -38,8 +42,10 @@ public class HangedGame {
         List<Integer> indexes = getOccurrenceIndexes(character, regex);
         if (!indexes.isEmpty()) {
             currentSaying.replaceIndexesWithCharacter(character, indexes);
+            logger.info("Trying character " + character);
             return true;
         }
+        logger.info("Character " + character + " not found");
         return false;
     }
 
@@ -52,6 +58,7 @@ public class HangedGame {
             indexes.add(matcher.start());
         }
 
+        logger.info("Found " + indexes.size() + " occurrences of " + character);
         return indexes;
     }
 }
