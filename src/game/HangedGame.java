@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Scanner;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class HangedGame {
@@ -27,7 +27,7 @@ public class HangedGame {
     }
 
     public HangedGame() throws IOException {
-        currentCollection = SayingUtils.getWordsFromDocumentName("default");
+        currentCollection = SayingUtils.getWordsFromDocumentName("easy");
         currentSaying = new HiddenSaying(currentCollection.poll());
     }
 
@@ -94,7 +94,14 @@ public class HangedGame {
         System.out.println(game.getCurrentSaying().getHiddenSaying());
         game.tryConsonant('n');
         game.tryVowel('a');
-
         System.out.println(game.getCurrentSaying().getHiddenSaying());
+
+        Scanner s = new Scanner(System.in);
+        while(true){
+            System.out.println("Insert phrase: ");
+            boolean exists = game.tryPhrase(s.nextLine());
+            System.out.println(exists);
+            System.out.println(game.getCurrentSaying().getHiddenSaying());
+        }
     }
 }
