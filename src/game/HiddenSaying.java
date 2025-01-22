@@ -1,6 +1,5 @@
 package game;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class HiddenSaying {
@@ -30,6 +29,10 @@ public class HiddenSaying {
 
     public void revealAll() {
         hiddenSaying = saying.toCharArray();
+    }
+
+    public boolean isWordCompleted(){
+        return getHiddenSaying().equalsIgnoreCase(saying);
     }
 
     public void newSaying(String saying){
