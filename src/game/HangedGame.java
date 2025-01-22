@@ -1,7 +1,9 @@
 package game;
 
+import util.SayingUtils;
 import util.SimpleLogger;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -23,42 +25,76 @@ public class HangedGame {
         currentSaying = new HiddenSaying(currentCollection.poll());
         logger.info("HangedGame created");
     }
+
+    public HangedGame() throws IOException {
+        currentCollection = SayingUtils.getWordsFromDocumentName("default");
+        currentSaying = new HiddenSaying(currentCollection.poll());
+    }
+
     public boolean tryConsonant(char consonant) {
         logger.info("Trying consonant " + consonant);
-        return tryCharacter(consonant, CONSONANT_REGEX);
+        return containsCharacter(consonant, CONSONANT_REGEX);
     }
 
     public boolean tryVowel(char vowel) {
         logger.info("Trying vowel " + vowel);
-        return tryCharacter(vowel, VOWEL_REGEX);
+        return containsCharacter(vowel, VOWEL_REGEX);
     }
 
-    public boolean tryPhrase(String phrase){
+    public boolean tryPhrase(String phrase) {
         logger.info("Trying phrase " + phrase);
-        return (phrase.trim().equalsIgnoreCase(currentSaying.getSaying().trim()));
-    }
-
-    private boolean tryCharacter(char character, String regex) {
-        List<Integer> indexes = getOccurrenceIndexes(character, regex);
-        if (!indexes.isEmpty()) {
-            currentSaying.replaceIndexesWithCharacter(character, indexes);
-            logger.info("Trying character " + character);
+        if (phrase.trim().equalsIgnoreCase(currentSaying.getSaying().trim())) {
+            currentSaying.revealAll();
+            logger.info("Phrase guessed correctly!");
             return true;
         }
-        logger.info("Character " + character + " not found");
+        logger.info("Phrase guessed incorrectly.");
         return false;
     }
 
-    private List<Integer> getOccurrenceIndexes(char character, String regex){
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(Character.toString(character));
+    private boolean containsCharacter(char character, String regex) {
+        if (!Pattern.matches(regex, Character.toString(character))) {
+            logger.warning("Invalid character " + character + " for this guess type.");
+            return false;
+        }
 
+        List<Integer> indexes = getOccurrenceIndexes(character);
+        if (!indexes.isEmpty()) {
+            currentSaying.replaceIndexesWithCharacter(character, indexes);
+            logger.info("Character " + character + " found at positions " + indexes);
+            return true;
+        }
+        logger.info("Character " + character + " not found.");
+        return false;
+    }
+
+
+    private List<Integer> getOccurrenceIndexes(char character) {
+        String saying = currentSaying.getSaying().toLowerCase();
         List<Integer> indexes = new ArrayList<>();
-        while (matcher.find()){
-            indexes.add(matcher.start());
+
+        for (int i = 0; i < saying.length(); i++) {
+            if (saying.charAt(i) == Character.toLowerCase(character)) {
+                indexes.add(i);
+            }
         }
 
         logger.info("Found " + indexes.size() + " occurrences of " + character);
         return indexes;
+    }
+
+    public HiddenSaying getCurrentSaying() {
+        return currentSaying;
+    }
+
+    //TEST AREA
+    public static void main(String[] args) throws IOException {
+        HangedGame game = new HangedGame();
+        System.out.println(game.getCurrentSaying().getSaying());
+        System.out.println(game.getCurrentSaying().getHiddenSaying());
+        game.tryConsonant('n');
+        game.tryVowel('a');
+
+        System.out.println(game.getCurrentSaying().getHiddenSaying());
     }
 }
