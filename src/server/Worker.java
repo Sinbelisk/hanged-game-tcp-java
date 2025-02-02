@@ -28,4 +28,8 @@ public class Worker extends Thread{
             ex.printStackTrace();
         }
     }
+
+    public Socket getClientSocket() {
+        return clientSocket;
+    }
 }

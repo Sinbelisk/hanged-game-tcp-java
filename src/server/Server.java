@@ -1,27 +1,55 @@
 package server;
 
+import util.SimpleLogger;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 public class Server {
+    private static final int DEFAULT_POOL_SIZE = 10;
+    private static final Logger logger = SimpleLogger.getInstance().getLogger(Server.class);  // Usando el logger
+    private final ExecutorService pool;
     private final int port;
     private boolean running = true;
-    public Server(int port) {
+
+    public Server(int port, int poolSize) {
         this.port = port;
+        this.pool = Executors.newFixedThreadPool(poolSize > 0 ? poolSize : DEFAULT_POOL_SIZE);
     }
 
-    public void start(){
-        try(ServerSocket serverSocket = new ServerSocket(port)){
+    public Server(int port) {
+        this(port, DEFAULT_POOL_SIZE);
+    }
 
-            while(running){
-                Socket clientSocket = serverSocket.accept();
-                Worker worker = new Worker(clientSocket);
-                worker.start();
+    public void start() {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            logger.info("Server started on port: " + port);  // Log en lugar de println
+
+            while (running) {
+                try {
+                    Socket clientSocket = serverSocket.accept();
+
+                    if (clientSocket != null && !clientSocket.isClosed()) {
+                        logger.info("Accepted connection from " + clientSocket.getInetAddress());
+                        pool.execute(new Worker(clientSocket));
+                    }
+
+                } catch (IOException e) {
+                    logger.severe("Error accepting client connection: " + e.getMessage());
+                }
             }
-
-        } catch (IOException e){
-            e.printStackTrace();
+        } catch (IOException e) {
+            logger.severe("Error starting server on port " + port + ": " + e.getMessage());
         }
     }
+    public static void main(String[] args) {
+        Server server = new Server(8080, 10);
+        server.start();
+    }
 }
+
+
