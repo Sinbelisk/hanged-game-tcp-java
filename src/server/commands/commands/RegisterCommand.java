@@ -5,10 +5,8 @@ import server.Worker;
 import server.commands.Command;
 
 public class RegisterCommand implements Command {
-    private UserManager userManager;
 
     public RegisterCommand() {
-        UserManager userManager = UserManager.getInstance();
     }
 
     @Override
@@ -20,6 +18,6 @@ public class RegisterCommand implements Command {
         String name = elements[0];
         String password = elements[1];
 
-        userManager.registerUser(name, password);
+        UserManager.getInstance().registerUser(name, password);
     }
 }
