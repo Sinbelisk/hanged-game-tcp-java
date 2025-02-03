@@ -22,6 +22,5 @@ public class ConsonantCommand implements Command {
 
     @Override
     public void assingServices(ServiceRegistry services) {
-
     }
 }
