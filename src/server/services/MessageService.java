@@ -36,11 +36,15 @@ public class MessageService {
         send("User registered, use 'login <user> <password>' to log in.");
     }
 
+    public void sendPlayerCurrentlyPlaying(){
+        send("You are already on a room.");
+    }
+
     public void sedUserCouldntRegister(){
         send("That username is not available, try another");
     }
 
-    private void send(String msg){
+    public void send(String msg){
         try{
             String userId = user == null ? "" : user.getId();
             logger.info("Sending message to " + userId + ": " + msg);

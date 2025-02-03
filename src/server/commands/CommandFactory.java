@@ -1,5 +1,7 @@
 package server.commands;
 
+import server.commands.commands.GameCommand;
+import server.commands.commands.VowelCommand;
 import server.services.ServiceRegistry;
 import server.commands.commands.LoginCommand;
 import server.commands.commands.RegisterCommand;
@@ -19,6 +21,8 @@ public class CommandFactory {
 
         commandMap.put("/login", LoginCommand.class);
         commandMap.put("/register", RegisterCommand.class);
+        commandMap.put("/vowel", VowelCommand.class);
+        commandMap.put("/game", GameCommand.class);
     }
 
     public Command createCommand(String commandName) {

@@ -3,9 +3,11 @@ package server;
 import common.SocketConnection;
 import server.commands.Command;
 import server.commands.CommandFactory;
+import server.game.GameRoom;
 import server.services.MessageService;
 import server.services.ServiceRegistry;
 import util.SimpleLogger;
+import util.StringUtils;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -18,6 +20,7 @@ public class Worker extends Thread{
     private final Logger logger = SimpleLogger.getInstance().getLogger(getClass());
     private final ServiceRegistry services;
     private MessageService messageService;
+    private GameRoom currentRoom;
 
     public Worker(Socket clientSocket, ServiceRegistry services){
         this.clientSocket = clientSocket;
@@ -46,7 +49,7 @@ public class Worker extends Thread{
 
                 if(command != null){
                     command.assingServices(services);
-                    command.execute(tokens, this);
+                    command.execute(StringUtils.parseArguments(tokens), this);
                 } else{
                     messageService.sendUnknownCommand();
                 }
@@ -73,5 +76,25 @@ public class Worker extends Thread{
 
     public void stopWorker(){
         running = false;
+    }
+
+    public GameRoom getCurrentRoom() {
+        return currentRoom;
+    }
+
+    public void setCurrentRoom(GameRoom currentRoom) {
+        this.currentRoom = currentRoom;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
+    }
+
+    public boolean isPlaying(){
+        return currentRoom != null;
     }
 }

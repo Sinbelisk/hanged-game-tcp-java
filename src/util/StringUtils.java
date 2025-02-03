@@ -14,4 +14,12 @@ public class StringUtils {
         return userName + "@" + socket.getInetAddress().getHostAddress();
     }
 
+    public static String[] parseArguments(String[] strings){
+        int size = strings.length - 1;
+        String[] parsedStrings = new String[size];
+        System.arraycopy(strings, 1, parsedStrings, 0, size);
+
+        return parsedStrings;
+    }
+
 }

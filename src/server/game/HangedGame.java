@@ -152,4 +152,8 @@ public class HangedGame {
     public HiddenSaying getCurrentSaying() {
         return currentSaying;
     }
+
+    public boolean isGameCompleted(){
+        return currentSaying.isWordCompleted();
+    }
 }

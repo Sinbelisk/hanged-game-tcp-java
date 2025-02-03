@@ -7,7 +7,7 @@ import java.util.List;
 
 public class WorkerManager {
     private static WorkerManager instance;
-    private List<Worker> activeWorkers;
+    private final List<Worker> activeWorkers;
 
     public WorkerManager() {
         activeWorkers = new ArrayList<>();
@@ -22,5 +22,22 @@ public class WorkerManager {
 
     public void addWorker(Worker worker) {
         activeWorkers.add(worker);
+    }
+
+    public void removeWorker(Worker worker) {
+        activeWorkers.remove(worker);
+    }
+
+    public void removeAllWorkers() {
+        activeWorkers.clear();
+    }
+
+    public Worker getWorker(String name) {
+        for(Worker worker : activeWorkers) {
+            if(worker.getName().equals(name)) {
+                return worker;
+            }
+        }
+        return null;
     }
 }
