@@ -13,13 +13,20 @@ public class GameRoomManager {
 
     }
 
-    public synchronized boolean addRoom(GameRoom room) {
+    public synchronized void addRoom(GameRoom room) {
         if(activeRooms.containsKey(room.getName())) {
-            return false;
+            return;
         }
 
         activeRooms.put(room.getName(), room);
-        return true;
+    }
+
+    public synchronized void checkAndStartGame(String roomName){
+        GameRoom room = activeRooms.get(roomName);
+
+        if (room != null && !room.isGameActive() && room.getClients().size() >= room.getNecessaryClients()) {
+            room.startGame();
+        }
     }
 
     public synchronized boolean removeRoom(String roomName) {

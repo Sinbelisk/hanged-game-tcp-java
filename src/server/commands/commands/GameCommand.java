@@ -8,7 +8,6 @@ import server.services.ServiceRegistry;
 import server.services.UserManager;
 
 public class GameCommand implements Command {
-    private UserManager userManager;
     private GameRoomManager gameRoomManager;
 
     private static final String CREATE_COMMAND = "create";
@@ -73,10 +72,10 @@ public class GameCommand implements Command {
 
         if(room == null) {
             worker.getMessageService().send("La sala " + roomName + " no existe");
+            return;
         }
-        else {
-            enterRoom(worker, room);
-        }
+
+        enterRoom(worker, room);
     }
 
     private void startSoloGame(Worker worker) {
@@ -91,7 +90,6 @@ public class GameCommand implements Command {
 
     @Override
     public void assingServices(ServiceRegistry services) {
-        userManager = services.getService(UserManager.class);
         gameRoomManager = services.getService(GameRoomManager.class);
     }
 

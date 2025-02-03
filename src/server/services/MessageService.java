@@ -44,6 +44,10 @@ public class MessageService {
         send("That username is not available, try another");
     }
 
+    public void sendUserNotPlaying(){
+        send("No estas en ninguna partida activa.");
+    }
+
     public void send(String msg){
         try{
             String userId = user == null ? "" : user.getId();

@@ -36,7 +36,6 @@ public class Client {
                 try {
                     String response;
                     while ((response = connection.receive()) != null) {
-                        logger.info("Message received from server: " + response);
                         System.out.println("Server: " + response);
                     }
                 } catch (IOException e) {

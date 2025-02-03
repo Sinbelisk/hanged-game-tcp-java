@@ -1,9 +1,11 @@
 package server;
 
+import java.io.Serializable;
+
 /**
  * Representa un usuario con su contraseña y estadísticas de juego.
  */
-public class User {
+public class User implements Serializable {
     private final String username;
     private final String password;
     private final String id;

@@ -1,10 +1,7 @@
 package server.commands;
 
-import server.commands.commands.GameCommand;
-import server.commands.commands.VowelCommand;
+import server.commands.commands.*;
 import server.services.ServiceRegistry;
-import server.commands.commands.LoginCommand;
-import server.commands.commands.RegisterCommand;
 import util.SimpleLogger;
 
 import java.util.HashMap;
@@ -22,6 +19,8 @@ public class CommandFactory {
         commandMap.put("/login", LoginCommand.class);
         commandMap.put("/register", RegisterCommand.class);
         commandMap.put("/vowel", VowelCommand.class);
+        commandMap.put("/consonant", ConsonantCommand.class);
+        commandMap.put("/phrase", PhraseCommand.class);
         commandMap.put("/game", GameCommand.class);
     }
 

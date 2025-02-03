@@ -4,6 +4,7 @@ import common.SocketConnection;
 import server.commands.Command;
 import server.commands.CommandFactory;
 import server.game.GameRoom;
+import server.services.GameRoomManager;
 import server.services.MessageService;
 import server.services.ServiceRegistry;
 import util.SimpleLogger;
@@ -85,6 +86,9 @@ public class Worker extends Thread{
     public void setCurrentRoom(GameRoom currentRoom) {
         this.currentRoom = currentRoom;
         currentRoom.addPlayer(this);
+
+        // Checks if the game must start
+        services.getService(GameRoomManager.class).checkAndStartGame(currentRoom.getName());
     }
 
     public boolean isRunning() {

@@ -9,10 +9,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class UserManager{
     private static UserManager instance;
-    private final ConcurrentHashMap<String, User> users = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, User> users;
 
 
-    public UserManager(){}
+    public UserManager(){
+        users = new ConcurrentHashMap<>();
+    }
 
     public synchronized boolean registerUser(User user) {
         if(users.containsKey(user.getUsername())) return false;
@@ -26,10 +28,5 @@ public class UserManager{
 
     public boolean userExists(String username) {
         return users.containsKey(username);
-    }
-
-    public static UserManager getInstance() {
-        if(instance == null) instance = new UserManager();
-        return instance;
     }
 }

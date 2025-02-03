@@ -1,10 +1,13 @@
 package server.game;
 
-import server.User;
 import server.Worker;
+import util.SayingUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
+
+import java.io.IOException;
 
 public class GameRoom {
     private static final int DEFAULT_CLIENTS = 3;
@@ -17,76 +20,113 @@ public class GameRoom {
     private HangedGame currentGame;
 
     public GameRoom(String name, Boolean singlePlayer) {
-        necessaryClients = singlePlayer? SINGLE_PLAYER_CLIENT : DEFAULT_CLIENTS;
-
+        necessaryClients = singlePlayer ? SINGLE_PLAYER_CLIENT : DEFAULT_CLIENTS;
         this.name = name;
-        clients = singlePlayer ? new ArrayList<>(SINGLE_PLAYER_CLIENT) : new ArrayList<>(DEFAULT_CLIENTS);
+        this.clients = Collections.synchronizedList(new ArrayList<>(necessaryClients));
         this.singlePlayer = singlePlayer;
     }
 
-    public boolean startGame(){
-        try{
-            if(currentGame != null){
-                currentGame = new HangedGame();
+    public synchronized boolean startGame() {
+        if (currentGame == null && clients.size() >= necessaryClients) {
+            try {
+                currentGame = new HangedGame(SayingUtils.getWordsFromDocumentName("seasy"));
+                sendMessageToClients("🎮 El juego ha comenzado.");
+                showCurrentProverb();
                 return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                sendMessageToClients("❌ Error al iniciar la partida.");
             }
-        } catch (Exception e){
-            e.printStackTrace();
-
         }
         return false;
     }
 
-    public void stopGame(){
-        this.currentGame = null;
+    public synchronized void stopGame() {
+        if (currentGame != null) {
+            sendMessageToClients("🛑 La partida ha terminado.");
+            currentGame = null;
+        }
     }
 
-    public int getRemainingPlayers() {
+    public synchronized void addPlayer(Worker w) {
+        if (clients.contains(w)) {
+            w.getMessageService().send("Ya estás en esta sala.");
+            return;
+        }
+
+        clients.add(w);
+        notifyPlayerJoin(w);
+
+        if (clients.size() >= necessaryClients) {
+            startGame();
+        } else {
+            showRemainingPlayers();
+        }
+    }
+
+    public synchronized void guessConsonant(Worker sender, char consonant) {
+        if (currentGame != null) {
+            boolean correct = currentGame.tryConsonant(consonant);
+            sendMessageToClients("🔠 " + sender.getUser().getUsername() + " ha intentado la consonante '" + consonant + "'. " + (correct ? "✅ Correcta!" : "❌ Incorrecta."));
+            checkGameStatus();
+        }
+    }
+
+    public synchronized void guessVowel(Worker sender, char vowel) {
+        if (currentGame != null) {
+            boolean correct = currentGame.tryVowel(vowel);
+            sendMessageToClients("🔤 " + sender.getUser().getUsername() + " ha intentado la vocal '" + vowel + "'. " + (correct ? "✅ Correcta!" : "❌ Incorrecta."));
+            checkGameStatus();
+        }
+    }
+
+    public synchronized void guessPhrase(Worker sender, String phrase) {
+        if (currentGame != null) {
+            boolean correct = currentGame.tryPhrase(phrase);
+            sendMessageToClients("📜 " + sender.getUser().getUsername() + " ha intentado adivinar la frase. " + (correct ? "🎉 ¡Acertó!" : "❌ Incorrecta."));
+            checkGameStatus();
+        }
+    }
+
+    private void checkGameStatus() {
+        showCurrentProverb();
+        if (currentGame != null && currentGame.isGameCompleted()) {
+            sendMessageToClients("🎊 ¡El refrán fue adivinado! Era: " + currentGame.getCurrentSaying().getSaying());
+            nextRound();
+        }
+    }
+
+    private synchronized void nextRound() {
+        try{
+            if (!currentGame.getCurrentSaying().isWordCompleted()) {
+                sendMessageToClients("🆕 Siguiente refrán...");
+                currentGame = new HangedGame();
+                sendMessageToClients("🎮 Nuevo refrán: " + currentGame.getCurrentSaying().getHiddenSaying());
+            } else {
+                stopGame();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void notifyPlayerJoin(Worker newPlayer) {
+        for (Worker client : clients) {
+            if (!client.equals(newPlayer)) {
+                client.getMessageService().send("👤 " + newPlayer.getUser().getUsername() + " se ha unido a la sala.");
+            }
+        }
+    }
+
+    public synchronized int getRemainingPlayers() {
         return necessaryClients - clients.size();
     }
 
-    public void addPlayer(Worker w) {
-        clients.add(w);
-
-        if(!singlePlayer){
-            for (Worker client : clients) {
-                if(!client.equals(w)){
-                    client.getMessageService().send(client.getUser().getUsername() + " ha entrado en la sala.");
-                }
-            }
-        }
-
-        showRemainingPlayers();
+    public synchronized List<Worker> getClients() {
+        return new ArrayList<>(clients);
     }
 
-     void showRemainingPlayers() {
-        for (Worker client : clients) {
-            client.getMessageService().send("Jugadores restantes: " + getRemainingPlayers());
-        }
-    }
-
-    public int getNecessaryClients() {
-        return necessaryClients;
-    }
-
-    public List<Worker> getClients() {
-        return clients;
-    }
-
-    public List<User> getUsers() {
-        List<User> users = new ArrayList<>(clients.size());
-        for (Worker client : clients) {
-            users.add(client.getUser());
-        }
-
-        return users;
-    }
-
-    public boolean isSinglePlayer() {
-        return singlePlayer;
-    }
-
-    public boolean isGameActive() {
+    public synchronized boolean isGameActive() {
         return currentGame != null;
     }
 
@@ -96,5 +136,23 @@ public class GameRoom {
 
     public String getName() {
         return name;
+    }
+
+    private synchronized void showRemainingPlayers() {
+        sendMessageToClients("⌛ Faltan " + getRemainingPlayers() + " jugadores para comenzar.");
+    }
+
+    private synchronized void showCurrentProverb(){
+        sendMessageToClients("Refrán actual: " + currentGame.getCurrentSaying().getHiddenSaying());
+    }
+
+    private synchronized void sendMessageToClients(String message) {
+        for (Worker client : clients) {
+            client.getMessageService().send(message);
+        }
+    }
+
+    public int getNecessaryClients() {
+        return necessaryClients;
     }
 }

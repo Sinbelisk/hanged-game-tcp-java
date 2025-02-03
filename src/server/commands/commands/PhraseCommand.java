@@ -3,14 +3,13 @@ package server.commands.commands;
 import server.Worker;
 import server.commands.Command;
 import server.game.GameRoom;
-import server.services.GameRoomManager;
 import server.services.ServiceRegistry;
 
-public class VowelCommand implements Command {
+public class PhraseCommand implements Command {
 
     @Override
     public void execute(String[] args, Worker worker) {
-        char vowel = args[0].charAt(0);
+        String phrase = String.join(" ", args);
 
         GameRoom room = worker.getCurrentRoom();
         if(room == null){
@@ -18,7 +17,7 @@ public class VowelCommand implements Command {
             return;
         }
 
-        room.guessVowel(worker, vowel);
+        room.guessPhrase(worker, phrase);
     }
 
     @Override
