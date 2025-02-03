@@ -84,6 +84,7 @@ public class Worker extends Thread{
 
     public void setCurrentRoom(GameRoom currentRoom) {
         this.currentRoom = currentRoom;
+        currentRoom.addPlayer(this);
     }
 
     public boolean isRunning() {

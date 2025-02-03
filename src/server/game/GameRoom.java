@@ -17,7 +17,7 @@ public class GameRoom {
     private HangedGame currentGame;
 
     public GameRoom(String name, Boolean singlePlayer) {
-        necessaryClients = singlePlayer? 0 : 3;
+        necessaryClients = singlePlayer? SINGLE_PLAYER_CLIENT : DEFAULT_CLIENTS;
 
         this.name = name;
         clients = singlePlayer ? new ArrayList<>(SINGLE_PLAYER_CLIENT) : new ArrayList<>(DEFAULT_CLIENTS);
@@ -55,15 +55,17 @@ public class GameRoom {
                 }
             }
         }
+
+        showRemainingPlayers();
     }
 
-    private void showRemainingPlayers() {
+     void showRemainingPlayers() {
         for (Worker client : clients) {
-            client.getMessageService().send("Jugadores restantes: " + getRemainingPlayers() + "/" + getNeccesaryClients());
+            client.getMessageService().send("Jugadores restantes: " + getRemainingPlayers());
         }
     }
 
-    public int getNeccesaryClients() {
+    public int getNecessaryClients() {
         return necessaryClients;
     }
 

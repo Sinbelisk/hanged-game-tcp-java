@@ -53,7 +53,7 @@ public class GameCommand implements Command {
 
         String roomName = args[1];
 
-        GameRoom room = new GameRoom(roomName, true);
+        GameRoom room = new GameRoom(roomName, false);
         gameRoomManager.addRoom(room);
 
 
@@ -80,7 +80,7 @@ public class GameCommand implements Command {
     }
 
     private void startSoloGame(Worker worker) {
-        worker.setCurrentRoom(new GameRoom("Solo", false));
+        worker.setCurrentRoom(new GameRoom("Solo", true));
         worker.getMessageService().send("Partida de un solo jugador iniciada.");
     }
 
