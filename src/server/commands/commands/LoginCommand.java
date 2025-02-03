@@ -1,11 +1,12 @@
 package server.commands.commands;
 
-import server.User;
-import server.UserManager;
-import server.Worker;
+import server.*;
 import server.commands.Command;
+import server.services.ServiceRegistry;
+import server.services.UserManager;
 
 public class LoginCommand implements Command {
+    private UserManager userManager;
 
     public LoginCommand() {
     }
@@ -14,11 +15,23 @@ public class LoginCommand implements Command {
         String username = elements[0];
         String password = elements[1];
 
-        User user = UserManager.getInstance().getUser(username);
+        if(!userManager.userExists(username)) {
+            worker.getMessageService().sendUnknownCredentials();
+            return;
+        }
+
+        User user = userManager.getUser(username);
 
         if(user.getPassword().equals(password)) {
-            user.setAutentified(true);
-            System.out.printf("Usuario autentifikao");
+            user.setAuthenticated(true);
+            worker.setUser(user);
+
+            worker.getMessageService().sendUserHasLogedIn();
         }
+    }
+
+    @Override
+    public void assingServices(ServiceRegistry services) {
+        userManager = services.getService(UserManager.class);
     }
 }

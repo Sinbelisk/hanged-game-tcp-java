@@ -1,4 +1,4 @@
-package game;
+package server.game;
 
 import util.SayingUtils;
 import util.SimpleLogger;

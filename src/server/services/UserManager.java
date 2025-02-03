@@ -1,4 +1,6 @@
-package server;
+package server.services;
+
+import server.User;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -7,12 +9,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class UserManager{
     private static UserManager instance;
-    private UserManager(){}
     private final ConcurrentHashMap<String, User> users = new ConcurrentHashMap<>();
 
-    public synchronized boolean registerUser(String username, String password) {
-        if(users.containsKey(username)) return false;
-        users.put(username, new User(username, password));
+
+    public UserManager(){}
+
+    public synchronized boolean registerUser(User user) {
+        if(users.containsKey(user.getUsername())) return false;
+        users.put(user.getUsername(), user);
         return true;
     }
 

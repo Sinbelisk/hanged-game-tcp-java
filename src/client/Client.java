@@ -52,7 +52,7 @@ public class Client {
                 if (line != null) {
                     connection.send(line);
                     logger.info("Sent to server: " + line);
-                    if (line.equalsIgnoreCase("EXIT")) {
+                    if (line.equalsIgnoreCase("/exit")) {
                         logger.info("EXIT command received, closing connection.");
                         break;
                     }

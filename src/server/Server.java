@@ -1,5 +1,7 @@
 package server;
 
+import server.services.ServiceRegistry;
+import server.services.WorkerManager;
 import util.SimpleLogger;
 
 import java.io.IOException;
@@ -11,14 +13,17 @@ import java.util.logging.Logger;
 
 public class Server {
     private static final int DEFAULT_POOL_SIZE = 10;
-    private static final Logger logger = SimpleLogger.getInstance().getLogger(Server.class);  // Usando el logger
+    private static final Logger logger = SimpleLogger.getInstance().getLogger(Server.class);
     private final ExecutorService pool;
+    private final ServiceRegistry services;
+
     private final int port;
     private boolean running = true;
 
     public Server(int port, int poolSize) {
         this.port = port;
         this.pool = Executors.newFixedThreadPool(poolSize > 0 ? poolSize : DEFAULT_POOL_SIZE);
+        services = new ServiceRegistry();
     }
 
     public Server(int port) {
@@ -35,7 +40,9 @@ public class Server {
 
                     if (clientSocket != null && !clientSocket.isClosed()) {
                         logger.info("Accepted connection from " + clientSocket.getInetAddress());
-                        pool.execute(new Worker(clientSocket));
+                        Worker thread = new Worker(clientSocket, services);
+                        pool.execute(thread);
+                        services.getService(WorkerManager.class).addWorker(thread);
                     }
 
                 } catch (IOException e) {

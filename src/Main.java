@@ -1,4 +1,4 @@
-import game.HangedGame;
+import server.game.HangedGame;
 
 import java.io.IOException;
 import java.util.Scanner;

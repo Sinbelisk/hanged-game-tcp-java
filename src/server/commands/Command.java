@@ -1,5 +1,6 @@
 package server.commands;
 
+import server.services.ServiceRegistry;
 import server.Worker;
 
 /**
@@ -15,4 +16,5 @@ public interface Command {
      * @param owner The user who executed the command.
      */
     void execute(String[] elements, Worker worker);
+    void assingServices(ServiceRegistry services);
 }
