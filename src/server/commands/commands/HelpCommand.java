@@ -37,9 +37,15 @@ public class HelpCommand extends AbstractCommand {
                 /login <usuario> <contraseña>: Inicia sesión con el usuario y la contraseña.
                 /register <usuario> <contraseña>: Registra un nuevo usuario con el nombre y la contraseña.
                 /exit: Finaliza la conexión con el servidor.
+                
+                Comandos disponibles en el juego:
+                ----------------------------------------
                 /vowel <vocal>: Adivina una vocal en el juego.
                 /consonant <consonante>: Adivina una consonante en el juego.
                 /phrase <frase>: Adivina una frase completa en el juego.
+                
+                Comando para empezar el juego:
+                ----------------------------------------
                 /game <comando>: Administra las salas de juego.
                     - create <nombre>: Crea una nueva sala.
                     - enter <nombre>: Entra a una sala existente.
