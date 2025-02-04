@@ -1,6 +1,7 @@
 package server.game;
 
 import server.Worker;
+import server.services.MessageService;
 import util.SayingUtils;
 
 import java.util.ArrayList;
@@ -21,10 +22,13 @@ public class GameRoom {
 
     private int currentTurnIndex = 0;
 
-    public GameRoom(String name, boolean singlePlayer) {
+    private final MessageService messageService;
+
+    public GameRoom(String name, boolean singlePlayer, MessageService messageService) {
         this.name = name;
         this.necessaryClients = singlePlayer ? SINGLE_PLAYER_CLIENT : DEFAULT_CLIENTS;
         this.clients = Collections.synchronizedList(new ArrayList<>(necessaryClients));
+        this.messageService = messageService;
     }
 
     public synchronized boolean startGame() {
@@ -43,13 +47,13 @@ public class GameRoom {
         return false;
     }
 
-    public synchronized void addPlayer(Worker w) {
-        if (clients.contains(w)) {
-            w.getMessageService().send("Ya estás en esta sala.");
+    public synchronized void addPlayer(Worker client) {
+        if (clients.contains(client)) {
+            messageService.send("Ya estás en esta sala.", client);
             return;
         }
-        clients.add(w);
-        broadcast("[JOIN] " + w.getUser().getUsername() + " se ha unido a la sala.");
+        clients.add(client);
+        broadcast("[JOIN] " + client.getUser().getUsername() + " se ha unido a la sala.");
         if (clients.size() >= necessaryClients) {
             startGame();
         } else {
@@ -143,7 +147,7 @@ public class GameRoom {
 
     private synchronized boolean isPlayerTurn(Worker sender) {
         if (necessaryClients > 1 && !clients.get(currentTurnIndex).equals(sender)) {
-            sender.getMessageService().send("[WAIT] No es tu turno.");
+            messageService.send("[WAIT] No es tu turno.", sender);
             return false;
         }
         return true;
@@ -154,7 +158,7 @@ public class GameRoom {
     }
 
     private synchronized void broadcast(String message) {
-        clients.forEach(client -> client.getMessageService().send(message));
+        clients.forEach(client -> {messageService.send(message, client);});
     }
 
     public synchronized int getRemainingPlayers() {

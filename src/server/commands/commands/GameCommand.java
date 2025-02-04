@@ -57,7 +57,7 @@ public class GameCommand extends AbstractCommand{
 
         String roomName = args[1];
 
-        GameRoom room = new GameRoom(roomName, false);
+        GameRoom room = new GameRoom(roomName, false, messageService);
         gameRoomManager.addRoom(room);
 
         worker.setCurrentRoom(room);
@@ -83,7 +83,7 @@ public class GameCommand extends AbstractCommand{
     }
 
     private void startSoloGame(Worker worker) {
-        worker.setCurrentRoom(new GameRoom("Solo", true));
+        worker.setCurrentRoom(new GameRoom("Solo", true, messageService));
         messageService.send("Partida de un solo jugador iniciada.", worker);
     }
 
