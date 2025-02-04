@@ -31,10 +31,21 @@ public class ScoreManager {
     public int getRoundScore() {
         int score = 0;
 
-
+        if (tries > 15) {
+            score = 0;
+        } else if (tries >= 12) {
+            score = 50;
+        } else if (tries >= 9) {
+            score = 70;
+        } else if (tries >= 5) {
+            score = 100;
+        } else {
+            score = 150;
+        }
 
         return score;
     }
+
 
     /**
      * Incrementa en 1 el número de intentos realizados.
