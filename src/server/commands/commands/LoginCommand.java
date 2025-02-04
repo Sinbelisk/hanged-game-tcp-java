@@ -10,6 +10,7 @@ public class LoginCommand implements Command {
 
     public LoginCommand() {
     }
+
     @Override
     public void execute(String[] elements, Worker worker) {
         String username = elements[0];

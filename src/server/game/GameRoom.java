@@ -1,5 +1,6 @@
 package server.game;
 
+import server.User;
 import server.Worker;
 import util.SayingUtils;
 
@@ -17,6 +18,7 @@ public class GameRoom {
     private final List<Worker> clients;
     private final int necessaryClients;
     private HangedGame currentGame;
+
 
     public GameRoom(String name, Boolean singlePlayer) {
         necessaryClients = singlePlayer ? SINGLE_PLAYER_CLIENT : DEFAULT_CLIENTS;
@@ -89,21 +91,15 @@ public class GameRoom {
         }
     }
 
-    private void checkGameStatus() {
+    private synchronized void checkGameStatus() {
         showCurrentProverb();
-        showCurrentScore();
         if (currentGame != null && currentGame.isGameCompleted()) {
             sendMessageToClients("[WIN] ¡El refrán fue adivinado! Era: " + currentGame.getCurrentSaying().getSaying());
-            nextRound();
+            gameEnded();
         }
     }
 
-    private void showCurrentScore() {
-        for (Worker client : clients) {
-            sendMessageToClients("[SCORE] Tu puntuación actual: " + client.getUser().getScore());
-        }
-    }
-
+    // TODO: Hacer si queda tiempo
     private synchronized void nextRound() {
         try{
             if (!currentGame.getCurrentSaying().isWordCompleted()) {
@@ -146,6 +142,10 @@ public class GameRoom {
         return name;
     }
 
+    public boolean isEmpty() {
+        return clients.isEmpty();
+    }
+
     private synchronized void showRemainingPlayers() {
         sendMessageToClients("[WAIT] Faltan " + getRemainingPlayers() + " jugadores para comenzar.");
     }
@@ -163,10 +163,27 @@ public class GameRoom {
     private synchronized void gameEnded(){
         for (Worker client : clients) {
            sendMessageToClients("[END] El juego ha terminado, tu puntuación es:" + client.getUser().getScore());
+           sendMessageToClients("[END] Crea o únete a otra sala para jugar otra partida.");
+           client.exitRoom();
         }
+
+        clients.clear();
     }
 
     public int getNecessaryClients() {
         return necessaryClients;
+    }
+
+    public synchronized void removePlayer(Worker worker) {
+        clients.remove(worker);
+
+        User user = worker.getUser();
+        if(isGameActive() && clients.size() < necessaryClients){
+            sendMessageToClients("[REMOVE] El usuario " + user.getUsername() + " ha salido de la sala, no hay jugadores suficientes para continuar la partida" );
+        }
+        else if (!isGameActive() && clients.size() < necessaryClients){
+            sendMessageToClients("[REMOVE] El usuario " + user.getUsername() + " ha salido de la sala.");
+            showRemainingPlayers();
+        }
     }
 }

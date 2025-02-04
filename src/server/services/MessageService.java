@@ -16,45 +16,49 @@ public class MessageService {
         this.user = user;
     }
 
-    public void sendUnknownCommand(){
-        send("Unknown command, try 'help' to see available commands");
+    public void sendUnknownCommand() {
+        send("Comando desconocido, usa '/help' para ver los comandos disponibles");
     }
 
-    public void sendUserHasLogedIn(){
-        send("You have logged in");
+    public void sendUserHasLogedIn() {
+        send("Te has conectado al servidor, usa '/help' para ver los comandos disponibles");
     }
 
-    public void sendUnknownCredentials(){
-        send("Invalid credentials, try again");
+    public void sendUnknownCredentials() {
+        send("Credenciales inválidas, intenta de nuevo");
     }
 
-    public void sendUserMustRegister(){
-        send("Please register to access the server");
+    public void sendUserMustRegister() {
+        send("Debes registrarte para acceder al servidor");
     }
 
-    public void sendUserHasRegistered(){
-        send("User registered, use 'login <user> <password>' to log in.");
+    public void sendUserHasRegistered() {
+        send("Usuario registrado, usa '/login <usuario> <contraseña>' para iniciar sesión.");
     }
 
-    public void sendPlayerCurrentlyPlaying(){
-        send("You are already on a room.");
+    public void sendPlayerCurrentlyPlaying() {
+        send("Ya estás en una sala de juego.");
     }
 
-    public void sedUserCouldntRegister(){
-        send("That username is not available, try another");
+    public void sedUserCouldntRegister() {
+        send("Ese nombre de usuario no está disponible, prueba con otro");
     }
 
-    public void sendUserNotPlaying(){
-        send("No estas en ninguna partida activa.");
+    public void sendUserNotPlaying() {
+        send("No estás en ninguna partida activa.");
     }
 
-    public void send(String msg){
-        try{
+    public void sendUserExittedRoom(){
+        send("Has abandonado la sala.");
+    }
+
+    public void send(String msg) {
+        try {
             String userId = user == null ? "" : user.getId();
-            logger.info("Sending message to " + userId + ": " + msg);
+            logger.info("Enviando mensaje a " + userId + ": " + msg);
             connection.send(msg);
-        } catch (Exception e){
-            logger.severe("Error sending message: " + e.getMessage());
+        } catch (Exception e) {
+            logger.severe("Error al enviar mensaje: " + e.getMessage());
         }
     }
 }

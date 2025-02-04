@@ -12,6 +12,7 @@ public class GameCommand implements Command {
     private static final String CREATE_COMMAND = "create";
     private static final String ENTER_COMMAND = "enter";
     private static final String SOLO_COMMAND = "solo";
+    private static final String EXIT_COMMAND = "exit";
     private static final int MIN_PLAYERS = 3;
 
     @Override
@@ -23,23 +24,25 @@ public class GameCommand implements Command {
 
         String type = args[0];
 
-        if (worker.isPlaying()) {
+        if (worker.isPlaying() && !type.equalsIgnoreCase(EXIT_COMMAND)) {
             worker.getMessageService().sendPlayerCurrentlyPlaying();
             return;
         }
 
         switch (type.toLowerCase()) {
-            case CREATE_COMMAND:
-                createGame(args, worker);
-                break;
-            case ENTER_COMMAND:
-                enterGame(args, worker);
-                break;
-            case SOLO_COMMAND:
-                startSoloGame(worker);
-                break;
-            default:
-                worker.getMessageService().send(getCommandUsage());
+            case CREATE_COMMAND -> createGame(args, worker);
+            case ENTER_COMMAND -> enterGame(args, worker);
+            case SOLO_COMMAND -> startSoloGame(worker);
+            case EXIT_COMMAND -> exitGame(worker);
+            default -> worker.getMessageService().send(getCommandUsage());
+        }
+    }
+
+    private void exitGame(Worker worker) {
+        if (worker.isPlaying()){
+            worker.exitRoom();
+
+            worker.getMessageService().sendUserExittedRoom();
         }
     }
 
@@ -99,6 +102,7 @@ public class GameCommand implements Command {
                 Argumentos válidos:
                 create <name>: crea una nueva sala, son necesarios 3 jugadores para comenzar la partida.
                 enter <name>: entra en una sala ya existente.
+                exit: sales de la sala actual, si lo usas en mitad de una partida se cancelará el juego.
                 solo: inicia una partida de un solo jugador.
                 """;
     }

@@ -16,14 +16,14 @@ import java.util.logging.Logger;
 
 public class Worker extends Thread {
     private final Socket clientSocket;
-    private User user = null;
-    private boolean running = true;
     private final Logger logger = SimpleLogger.getInstance().getLogger(getClass());
     private final ServiceRegistry services;
+    private User user = null;
+    private boolean running = true;
     private MessageService messageService;
     private GameRoom currentRoom;
 
-    public Worker(Socket clientSocket, ServiceRegistry services){
+    public Worker(Socket clientSocket, ServiceRegistry services) {
         this.clientSocket = clientSocket;
         this.services = services;
     }
@@ -34,7 +34,7 @@ public class Worker extends Thread {
             connection.open();
             messageService = new MessageService(connection, user);
 
-            while(running){
+            while (running) {
                 // Recibir mensaje del cliente
                 String received = connection.receive();
                 logger.info("Received: " + received);
@@ -43,15 +43,15 @@ public class Worker extends Thread {
                 logger.info("Tokens: " + tokens.length);
 
                 Command command = null;
-                if(tokens[0].startsWith("/")){
+                if (tokens[0].startsWith("/")) {
                     command = services.getService(CommandFactory.class).createCommand(tokens[0]);
                     logger.info("Command: " + tokens[0]);
                 }
 
-                if(command != null){
+                if (command != null) {
                     command.assingServices(services);
                     command.execute(StringUtils.parseArguments(tokens), this);
-                } else{
+                } else {
                     messageService.sendUnknownCommand();
                 }
             }
@@ -64,18 +64,20 @@ public class Worker extends Thread {
     public Socket getClientSocket() {
         return clientSocket;
     }
+
     public User getUser() {
         return user;
     }
+
     public void setUser(User user) {
-       this.user = user.isAuthenticated() ? user : null;
+        this.user = user.isAuthenticated() ? user : null;
     }
 
     public MessageService getMessageService() {
         return messageService;
     }
 
-    public void stopWorker(){
+    public void stopWorker() {
         running = false;
     }
 
@@ -91,6 +93,15 @@ public class Worker extends Thread {
         services.getService(GameRoomManager.class).checkAndStartGame(currentRoom.getName());
     }
 
+    public void exitRoom(){
+        if (currentRoom.isEmpty()){
+            services.getService(GameRoomManager.class).removeRoom(currentRoom.getName());
+        }
+
+        currentRoom.removePlayer(this);
+        this.currentRoom = null;
+    }
+
     public boolean isRunning() {
         return running;
     }
@@ -99,7 +110,7 @@ public class Worker extends Thread {
         this.running = running;
     }
 
-    public boolean isPlaying(){
+    public boolean isPlaying() {
         return currentRoom != null;
     }
 
