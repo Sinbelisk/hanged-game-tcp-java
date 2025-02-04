@@ -109,17 +109,22 @@ public class GameRoom {
     public synchronized void removePlayer(Worker worker) {
         clients.remove(worker);
         worker.getUser().resetTries();
-        broadcast("[REMOVE] " + worker.getUser().getUsername() + " ha salido de la sala.");
+
+        if(isGameActive() && clients.size() > 1){
+            broadcast("[REMOVE] " + worker.getUser().getUsername() + " ha salido de la sala.");
+        }
 
         if (clients.isEmpty()) {
             endGame();
-        } else if (isGameActive() && clients.size() < necessaryClients) {
+        }
+        else if (isGameActive() && clients.size() < necessaryClients) {
             broadcast("[REMOVE] No hay jugadores suficientes para continuar la partida.");
             endGame();
         }
     }
 
     private synchronized void endGame() {
+        currentGame = null;
         clients.forEach(client -> {
             broadcast("[END] Tu puntuación es: " + client.getUser().getRoundScore());
             client.getUser().addScore(client.getUser().getRoundScore());
@@ -129,7 +134,7 @@ public class GameRoom {
         });
 
         clients.clear();
-        currentGame = null;
+
     }
 
 
