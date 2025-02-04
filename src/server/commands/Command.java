@@ -4,22 +4,21 @@ import server.services.ServiceRegistry;
 import server.Worker;
 
 /**
- * The Command interface represents a command that can be executed within a chat application.
- * Each command has an associated behavior when executed by the owner (user).
+ * La interfaz Command representa un comando que recibe el servidor.
+ * Cada comando tiene un comportamiento asociado cuando es ejecutado por el usuario.
  */
 public interface Command {
     /**
-     * Executes the command with the provided elements (arguments), client message, and user.
+     * Ejecuta el comando con los elementos (argumentos) proporcionados, el mensaje del cliente y el usuario.
      *
-     * @param elements The arguments split from the command string.
-     * @param message The message that initiated the command.
-     * @param owner The user who executed the command.
+     * @param elements Los argumentos divididos de la cadena de comando.
+     * @param worker El hilo de la conexión del cliente.
      */
     void execute(String[] elements, Worker worker);
 
     /**
-     * Assigns specified services to the command
-     * @param services The service registry.
+     * Asigna los servicios especificados al comando.
+     * @param services El registro de servicios.
      */
     void setServices(ServiceRegistry services);
 }

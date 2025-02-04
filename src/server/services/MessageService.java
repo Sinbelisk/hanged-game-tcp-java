@@ -20,6 +20,10 @@ public class MessageService {
         send("Error: debes iniciar sesión o registrarte para realizar esa acción", worker);
     }
 
+    public void sendUserAlreadyAuth(Worker worker) {
+        send("Error: ya has iniciado sesión", worker);
+    }
+
     public synchronized void send(String msg, Worker worker) {
         try {
             worker.getConnection().send(msg);
