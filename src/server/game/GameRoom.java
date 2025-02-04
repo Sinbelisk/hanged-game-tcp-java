@@ -98,31 +98,35 @@ public class GameRoom {
         }
     }
 
-    private synchronized void endGame() {
-        List<Worker> clientsCopy = new ArrayList<>(clients); // Copia para evitar modificación concurrente
+    // El bug ocurre porque el codigo de verificacion que se activa al salir un jugador se activa cada vez que sale
+    // un jugador.
 
-        for (Worker client : clientsCopy) {
+    public synchronized void removePlayer(Worker worker) {
+        clients.remove(worker);
+        worker.getUser().resetTries();
+        broadcast("[REMOVE] " + worker.getUser().getUsername() + " ha salido de la sala.");
+
+        if (clients.isEmpty()) {
+            endGame();
+        } else if (isGameActive() && clients.size() < necessaryClients) {
+            broadcast("[REMOVE] No hay jugadores suficientes para continuar la partida.");
+            endGame();
+        }
+    }
+
+    private synchronized void endGame() {
+        clients.forEach(client -> {
             broadcast("[END] Tu puntuación es: " + client.getUser().getRoundScore());
             client.getUser().addScore(client.getUser().getRoundScore());
             broadcast(client.getUser().getStats());
             broadcast("[END] La sala se va a cerrar. Para jugar otra partida, crea o únete a una nueva.");
-            client.getUser().resetTries();
             client.exitRoom();
-        }
+        });
 
         clients.clear();
         currentGame = null;
     }
 
-
-    public synchronized void removePlayer(Worker worker) {
-        clients.remove(worker);
-        broadcast("[REMOVE] " + worker.getUser().getUsername() + " ha salido de la sala.");
-
-        if (isGameActive() && clients.size() < necessaryClients) {
-            broadcast("[REMOVE] No hay jugadores suficientes para continuar la partida.");
-        }
-    }
 
     private synchronized void nextTurn() {
         if (clients.size() > 1) {
