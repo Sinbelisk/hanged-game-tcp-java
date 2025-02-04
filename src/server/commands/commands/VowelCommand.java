@@ -5,7 +5,7 @@ import server.commands.Command;
 import server.game.GameRoom;
 import server.services.ServiceRegistry;
 
-public class VowelCommand implements Command {
+public class VowelCommand extends AbstractCommand {
 
     @Override
     public void execute(String[] args, Worker worker) {
@@ -13,15 +13,10 @@ public class VowelCommand implements Command {
 
         GameRoom room = worker.getCurrentRoom();
         if(room == null){
-            worker.getMessageService().sendUserNotPlaying();
+            messageService.sendUserNotInGameRoom(worker);
             return;
         }
 
         room.guessLetter(worker, vowel, true);
-    }
-
-    @Override
-    public void assingServices(ServiceRegistry services) {
-
     }
 }

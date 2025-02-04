@@ -6,30 +6,29 @@ import server.game.GameRoom;
 import server.services.GameRoomManager;
 import server.services.ServiceRegistry;
 
-public class GameCommand implements Command {
+public class GameCommand extends AbstractCommand{
     private GameRoomManager gameRoomManager;
 
     private static final String CREATE_COMMAND = "create";
     private static final String ENTER_COMMAND = "enter";
     private static final String SOLO_COMMAND = "solo";
     private static final String EXIT_COMMAND = "exit";
-    private static final int MIN_PLAYERS = 3;
 
     @Override
     public void execute(String[] args, Worker worker) {
         if ((args == null || args.length < 1) && !worker.isPlaying()) {
-            worker.getMessageService().send(getCommandUsage());
+            messageService.send(getCommandUsage(), worker);
             return;
         }
 
         if(!worker.getUser().isAuthenticated()){
-            worker.getMessageService().send("No estas autenticado, registrate o inicia sesión.");
+            messageService.send("No estas autenticado, registrate o inicia sesión.", worker);
         }
 
         String type = args[0];
 
         if (worker.isPlaying() && !type.equalsIgnoreCase(EXIT_COMMAND)) {
-            worker.getMessageService().sendPlayerCurrentlyPlaying();
+            messageService.send("Ya estas en una sala de juego.", worker);
             return;
         }
 
@@ -38,7 +37,7 @@ public class GameCommand implements Command {
             case ENTER_COMMAND -> enterGame(args, worker);
             case SOLO_COMMAND -> startSoloGame(worker);
             case EXIT_COMMAND -> exitGame(worker);
-            default -> worker.getMessageService().send(getCommandUsage());
+            default -> messageService.send(getCommandUsage(), worker);
         }
     }
 
@@ -46,13 +45,13 @@ public class GameCommand implements Command {
         if (worker.isPlaying()){
             worker.exitRoom();
 
-            worker.getMessageService().sendUserExittedRoom();
+            messageService.send("Has abandonado la sala de juego.", worker);
         }
     }
 
     private void createGame(String[] args, Worker worker) {
         if (args.length < 2) {
-            worker.getMessageService().send("La sala necesita un nombre.");
+            messageService.send("La sala necesita un nombre.", worker);
             return;
         }
 
@@ -61,14 +60,13 @@ public class GameCommand implements Command {
         GameRoom room = new GameRoom(roomName, false);
         gameRoomManager.addRoom(room);
 
-
         worker.setCurrentRoom(room);
-        worker.getMessageService().send("Sala creada: " + roomName);
+        messageService.send("Sala creada: " + roomName, worker);
     }
 
     private void enterGame(String[] args, Worker worker) {
         if (args.length < 2) {
-            worker.getMessageService().send("Necesitas introducir el nombre de la sala.");
+            messageService.send("Necesitas introducir el nombre de la sala.", worker);
             return;
         }
 
@@ -77,7 +75,7 @@ public class GameCommand implements Command {
         GameRoom room = gameRoomManager.getRoom(roomName);
 
         if(room == null) {
-            worker.getMessageService().send("La sala " + roomName + " no existe");
+            messageService.send("La sala " + roomName + " no existe", worker);
             return;
         }
 
@@ -86,16 +84,17 @@ public class GameCommand implements Command {
 
     private void startSoloGame(Worker worker) {
         worker.setCurrentRoom(new GameRoom("Solo", true));
-        worker.getMessageService().send("Partida de un solo jugador iniciada.");
+        messageService.send("Partida de un solo jugador iniciada.", worker);
     }
 
     private void enterRoom(Worker worker, GameRoom room) {
         worker.setCurrentRoom(room);
-        worker.getMessageService().send("Has entrado en la sala " + room.getName());
+        messageService.send("Has entrado en la sala " + room.getName(), worker);
     }
 
     @Override
     public void assingServices(ServiceRegistry services) {
+        super.assingServices(services);
         gameRoomManager = services.getService(GameRoomManager.class);
     }
 

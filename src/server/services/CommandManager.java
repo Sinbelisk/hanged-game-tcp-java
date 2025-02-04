@@ -42,8 +42,4 @@ public class CommandManager {
         command.execute(StringUtils.parseArguments(args), worker);
         logger.info("[" + Thread.currentThread().getName() + "] Comando ejecutado: " + args[0]);
     }
-
-    public String getAllRegisteredCommands(){
-
-    }
 }

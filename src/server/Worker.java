@@ -1,15 +1,13 @@
 package server;
 
 import common.SocketConnection;
-import server.commands.Command;
-import server.commands.CommandFactory;
 import server.game.GameRoom;
+import server.game.User;
 import server.services.CommandManager;
 import server.services.GameRoomManager;
 import server.services.MessageService;
 import server.services.ServiceRegistry;
 import util.SimpleLogger;
-import util.StringUtils;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -23,7 +21,6 @@ public class Worker extends Thread {
     private User user = null;
 
     private volatile boolean running = true;
-    private MessageService messageService;
     private GameRoom currentRoom;
     private SocketConnection connection;
 
@@ -48,7 +45,6 @@ public class Worker extends Thread {
     private void initializeConnection() throws IOException {
         connection = new SocketConnection(clientSocket);
         connection.open();
-        messageService = new MessageService(connection, user);
         logger.info("[" + getName() + "] Conexión establecida.");
     }
 
@@ -103,15 +99,15 @@ public class Worker extends Thread {
         return currentRoom != null;
     }
 
-    public MessageService getMessageService() {
-        return messageService;
-    }
-
     public User getUser() {
         return user;
     }
 
     public GameRoom getCurrentRoom() {
         return currentRoom;
+    }
+
+    public SocketConnection getConnection() {
+        return connection;
     }
 }

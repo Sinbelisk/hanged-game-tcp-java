@@ -4,14 +4,11 @@ import server.services.ServiceRegistry;
 import server.Worker;
 import server.commands.Command;
 
-public class ExitCommand implements Command {
+public class ExitCommand extends AbstractCommand {
 
     @Override
     public void execute(String[] elements, Worker worker) {
         worker.stopWorker();
-        worker.getMessageService().sendUserLogOut();
+        messageService.send("Se ha terminado la conexión con el servidor.", worker);
     }
-
-    @Override
-    public void assingServices(ServiceRegistry services) {}
 }

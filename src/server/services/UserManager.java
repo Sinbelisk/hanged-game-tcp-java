@@ -1,6 +1,6 @@
 package server.services;
 
-import server.User;
+import server.game.User;
 
 import java.util.concurrent.ConcurrentHashMap;
 

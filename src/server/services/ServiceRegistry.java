@@ -13,6 +13,7 @@ public class ServiceRegistry {
         registerService(UserManager.class, new UserManager());
         registerService(GameRoomManager.class, new GameRoomManager());
         registerService(CommandManager.class, new CommandManager(this));
+        registerService(MessageService.class, new MessageService());
     }
 
     public <T> void registerService(Class<T> serviceClass, T instance) {

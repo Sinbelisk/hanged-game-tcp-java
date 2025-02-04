@@ -1,6 +1,6 @@
 package util;
 
-import server.User;
+import server.game.User;
 
 public class FileUtils {
     public static void serializeUser(User user) {

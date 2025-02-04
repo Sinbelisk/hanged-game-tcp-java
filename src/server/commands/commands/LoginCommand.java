@@ -2,6 +2,7 @@ package server.commands.commands;
 
 import server.*;
 import server.commands.Command;
+import server.game.User;
 import server.services.ServiceRegistry;
 import server.services.UserManager;
 
