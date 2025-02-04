@@ -47,7 +47,7 @@ public class CommandManager {
     }
 
     private void executeCommand(Command command, String[] args, Worker worker) {
-        command.assingServices(services);
+        command.setServices(services);
         command.execute(parseArguments(args), worker);
         logger.info("[" + Thread.currentThread().getName() + "] Comando ejecutado: " + args[0]);
     }

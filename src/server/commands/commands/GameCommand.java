@@ -1,7 +1,6 @@
 package server.commands.commands;
 
 import server.Worker;
-import server.commands.Command;
 import server.game.GameRoom;
 import server.services.GameRoomManager;
 import server.services.ServiceRegistry;
@@ -94,8 +93,8 @@ public class GameCommand extends AbstractCommand{
     }
 
     @Override
-    public void assingServices(ServiceRegistry services) {
-        super.assingServices(services);
+    public void setServices(ServiceRegistry services) {
+        super.setServices(services);
         gameRoomManager = services.getService(GameRoomManager.class);
     }
 

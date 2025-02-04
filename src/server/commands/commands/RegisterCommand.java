@@ -1,7 +1,6 @@
 package server.commands.commands;
 
 import server.*;
-import server.commands.Command;
 import server.game.User;
 import server.services.ServiceRegistry;
 import server.services.UserManager;
@@ -33,8 +32,8 @@ public class RegisterCommand extends AbstractCommand{
     }
 
     @Override
-    public void assingServices(ServiceRegistry services) {
-        super.assingServices(services);
+    public void setServices(ServiceRegistry services) {
+        super.setServices(services);
         userManager = services.getService(UserManager.class);
     }
 }

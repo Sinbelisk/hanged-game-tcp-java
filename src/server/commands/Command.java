@@ -16,5 +16,10 @@ public interface Command {
      * @param owner The user who executed the command.
      */
     void execute(String[] elements, Worker worker);
-    void assingServices(ServiceRegistry services);
+
+    /**
+     * Assigns specified services to the command
+     * @param services The service registry.
+     */
+    void setServices(ServiceRegistry services);
 }

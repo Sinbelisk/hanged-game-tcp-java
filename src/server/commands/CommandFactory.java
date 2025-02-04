@@ -35,7 +35,7 @@ public class CommandFactory {
 
         try {
             Command command = commandClass.getDeclaredConstructor().newInstance();
-            command.assingServices(serverServices);
+            command.setServices(serverServices);
 
             return commandClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {

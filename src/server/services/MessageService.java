@@ -20,7 +20,7 @@ public class MessageService {
         send("Error: debes iniciar sesión o registrarte para realizar esa acción", worker);
     }
 
-    public void send(String msg, Worker worker) {
+    public synchronized void send(String msg, Worker worker) {
         try {
             worker.getConnection().send(msg);
         } catch (Exception e) {

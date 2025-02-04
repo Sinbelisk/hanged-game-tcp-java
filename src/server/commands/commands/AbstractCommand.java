@@ -10,7 +10,7 @@ public abstract class AbstractCommand implements Command {
     protected MessageService messageService;
 
     @Override
-    public void assingServices(ServiceRegistry services) {
+    public void setServices(ServiceRegistry services) {
         messageService = services.getService(MessageService.class);
     }
 
