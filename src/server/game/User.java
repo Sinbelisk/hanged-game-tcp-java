@@ -30,19 +30,15 @@ public class User implements Serializable {
         return password;
     }
 
-    public int getTries() {
-        return tries;
-    }
-
     public int getRoundScore() {
-        int score = 0;
+        int score = -1;
 
-        if(tries < 5) score = 150;
+        if(tries < 5 && tries > 0) score = 150;
         else if (tries <= 8) score = 100;
         else if (tries <= 11) score = 70;
         else if (tries <= 15) score = 50;
 
-        return score;
+        return score == -1 ? 0 : score;
     }
 
     public void addScore(int score) {
