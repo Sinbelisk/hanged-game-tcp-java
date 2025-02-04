@@ -8,6 +8,7 @@ public class ConsonantCommand extends AbstractCommand {
     public void execute(String[] args, Worker worker) {
         if(!isUserAuthenticated(worker)){
             messageService.sendUserMustAuth(worker);
+            return;
         }
 
         char consonant = args[0].charAt(0);

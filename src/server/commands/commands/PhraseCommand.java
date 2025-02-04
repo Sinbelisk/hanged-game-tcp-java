@@ -11,6 +11,7 @@ public class PhraseCommand extends AbstractCommand {
     public void execute(String[] args, Worker worker) {
         if(!isUserAuthenticated(worker)){
             messageService.sendUserMustAuth(worker);
+            return;
         }
 
         String phrase = String.join(" ", args);

@@ -11,6 +11,7 @@ public class VowelCommand extends AbstractCommand {
     public void execute(String[] args, Worker worker) {
         if(!isUserAuthenticated(worker)){
             messageService.sendUserMustAuth(worker);
+            return;
         }
 
         char vowel = args[0].charAt(0);

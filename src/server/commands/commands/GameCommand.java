@@ -18,6 +18,7 @@ public class GameCommand extends AbstractCommand{
     public void execute(String[] args, Worker worker) {
         if(!isUserAuthenticated(worker)){
             messageService.sendUserMustAuth(worker);
+            return;
         }
 
         if ((args == null || args.length < 1) && !worker.isPlaying()) {
