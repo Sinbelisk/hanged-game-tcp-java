@@ -6,7 +6,7 @@ import server.game.User;
 import server.services.ServiceRegistry;
 import server.services.UserManager;
 
-public class RegisterCommand implements Command {
+public class RegisterCommand extends AbstractCommand{
     private UserManager userManager;
 
     public RegisterCommand() {
@@ -25,15 +25,16 @@ public class RegisterCommand implements Command {
 
         boolean result = userManager.registerUser(newUser);
         if (result) {
-            worker.getMessageService().sendUserHasRegistered();
+            messageService.send("Registro completado correctamente, utiliza '/login <usuario> <contraseña>' para iniciar sesión", worker);
         }
         else {
-            worker.getMessageService().sedUserCouldntRegister();
+            messageService.send("Ya existe un usuario con ese nombre, utiliza otro", worker);
         }
     }
 
     @Override
     public void assingServices(ServiceRegistry services) {
+        super.assingServices(services);
         userManager = services.getService(UserManager.class);
     }
 }

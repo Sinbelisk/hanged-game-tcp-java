@@ -1,9 +1,7 @@
 package server.commands.commands;
 
 import server.Worker;
-import server.commands.Command;
 import server.game.GameRoom;
-import server.services.ServiceRegistry;
 
 public class ConsonantCommand extends AbstractCommand {
     @Override

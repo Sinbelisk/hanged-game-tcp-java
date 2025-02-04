@@ -6,7 +6,7 @@ import server.game.User;
 import server.services.ServiceRegistry;
 import server.services.UserManager;
 
-public class LoginCommand implements Command {
+public class LoginCommand extends AbstractCommand {
     private UserManager userManager;
 
     public LoginCommand() {
@@ -15,14 +15,15 @@ public class LoginCommand implements Command {
     @Override
     public void execute(String[] elements, Worker worker) {
         if (elements.length < 2) {
-            worker.getMessageService().send("Necesitas especificar un usuario y contraseña");
+            messageService.send("Necesitas especificar un usuario y contraseña", worker);
+            return;
         }
 
         String username = elements[0];
         String password = elements[1];
 
         if(!userManager.userExists(username)) {
-            worker.getMessageService().sendUnknownCredentials();
+            messageService.send("ERROR: Credenciales inválidas, prueba de nuevo", worker);
             return;
         }
 
@@ -32,12 +33,13 @@ public class LoginCommand implements Command {
             user.setAuthenticated(true);
             worker.setUser(user);
 
-            worker.getMessageService().sendUserHasLogedIn();
+            messageService.send("Sesión iniciada correctamente, utiliza '/help' para ver los comandos disponibles", worker);
         }
     }
 
     @Override
     public void assingServices(ServiceRegistry services) {
+        super.assingServices(services);
         userManager = services.getService(UserManager.class);
     }
 }

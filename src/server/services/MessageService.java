@@ -1,8 +1,6 @@
 package server.services;
 
-import common.Connection;
 import server.Worker;
-import server.game.User;
 import util.SimpleLogger;
 
 import java.util.logging.Logger;
@@ -12,6 +10,10 @@ public class MessageService {
 
     public void sendUserNotInGameRoom(Worker worker) {
         send("Error: no estas en ninguna sala de juego.", worker);
+    }
+
+    public void sendUnknownCommand(Worker worker) {
+        send("Error: comando desconocido, usa '/help' para ver la lista de comandos disponibles", worker);
     }
 
     public void send(String msg, Worker worker) {

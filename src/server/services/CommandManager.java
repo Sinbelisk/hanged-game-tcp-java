@@ -13,10 +13,12 @@ public class CommandManager {
     private final CommandFactory commandFactory;
 
     private final ServiceRegistry services;
+    private final MessageService messageService;
 
     public CommandManager(ServiceRegistry services) {
         this.services = services;
         this.commandFactory = new CommandFactory(services);
+        this.messageService = services.getService(MessageService.class);
     }
 
     public void processCommand(String received, Worker worker) {
@@ -27,7 +29,7 @@ public class CommandManager {
         if (command != null) {
             executeCommand(command, commandArgs, worker);
         } else {
-            worker.getMessageService().sendUnknownCommand();
+            messageService.sendUnknownCommand(worker);
             logger.warning("[" + worker.getName() + "] Comando desconocido: " + commandArgs[0]);
         }
     }
