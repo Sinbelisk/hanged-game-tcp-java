@@ -19,6 +19,9 @@ public class GameRoom {
     private final int necessaryClients;
     private HangedGame currentGame;
 
+    private int currentTurnIndex = 0;
+    private boolean gameEnded = false;
+
 
     public GameRoom(String name, Boolean singlePlayer) {
         necessaryClients = singlePlayer ? SINGLE_PLAYER_CLIENT : DEFAULT_CLIENTS;
@@ -26,12 +29,14 @@ public class GameRoom {
         this.clients = Collections.synchronizedList(new ArrayList<>(necessaryClients));
     }
 
+
     public synchronized boolean startGame() {
         if (currentGame == null && clients.size() >= necessaryClients) {
             try {
                 currentGame = new HangedGame(SayingUtils.getWordsFromDocumentName("seasy"));
                 sendMessageToClients("[GAME] El juego ha comenzado.");
                 showCurrentProverb();
+                notifyCurrentTurn();
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -39,13 +44,6 @@ public class GameRoom {
             }
         }
         return false;
-    }
-
-    public synchronized void stopGame() {
-        if (currentGame != null) {
-            sendMessageToClients("[STOP] La partida ha terminado.");
-            currentGame = null;
-        }
     }
 
     public synchronized void addPlayer(Worker w) {
@@ -65,14 +63,19 @@ public class GameRoom {
     }
 
     public synchronized void guessConsonant(Worker sender, char consonant) {
+        if (!isPlayerTurn(sender)) return;
+
         if (currentGame != null) {
             boolean correct = currentGame.tryConsonant(consonant);
             sendMessageToClients("[GUESS] " + sender.getUser().getUsername() + " ha intentado la consonante '" + consonant + "'. " + (correct ? "[OK] Correcta!" : "[X] Incorrecta."));
             checkGameStatus();
+            nextTurn();
         }
     }
 
     public synchronized void guessVowel(Worker sender, char vowel) {
+        if (!isPlayerTurn(sender)) return;
+
         if (currentGame != null) {
             boolean correct = currentGame.tryVowel(vowel);
             if (!correct) {
@@ -80,14 +83,32 @@ public class GameRoom {
             }
             sendMessageToClients("[GUESS] " + sender.getUser().getUsername() + " ha intentado la vocal '" + vowel + "'. " + (correct ? "[OK] Correcta!" : "[X] Incorrecta."));
             checkGameStatus();
+            nextTurn();
         }
     }
 
     public synchronized void guessPhrase(Worker sender, String phrase) {
+        if (!isPlayerTurn(sender)) return;
+
         if (currentGame != null) {
             boolean correct = currentGame.tryPhrase(phrase);
-            sendMessageToClients("[GUESS] " + sender.getUser().getUsername() + " ha intentado adivinar la frase. " + (correct ? "[WIN] ¡Acertó!" : "[X] Incorrecta."));
-            checkGameStatus();
+            if (correct) {
+                sendMessageToClients("[GUESS] " + sender.getUser().getUsername() + " ha intentado adivinar la frase. [WIN] ¡Acertó!");
+                gameEnded();
+            } else {
+                sendMessageToClients("[GUESS] " + sender.getUser().getUsername() + " ha intentado adivinar la frase. [X] Incorrecta.");
+                clients.remove(sender);
+                sendMessageToClients("[LOSE] " + sender.getUser().getUsername() + " ha perdido la partida.");
+
+                //singleplayer
+                if (clients.size() == 1) {
+                    Worker winner = clients.get(0);
+                    sendMessageToClients("[WIN] " + winner.getUser().getUsername() + " ha ganado con " + winner.getUser().getScore() + " puntos.");
+                    gameEnded();
+                } else {
+                    nextTurn();
+                }
+            }
         }
     }
 
@@ -96,21 +117,6 @@ public class GameRoom {
         if (currentGame != null && currentGame.isGameCompleted()) {
             sendMessageToClients("[WIN] ¡El refrán fue adivinado! Era: " + currentGame.getCurrentSaying().getSaying());
             gameEnded();
-        }
-    }
-
-    // TODO: Hacer si queda tiempo
-    private synchronized void nextRound() {
-        try{
-            if (!currentGame.getCurrentSaying().isWordCompleted()) {
-                sendMessageToClients("[NEXT] Siguiente refrán...");
-                currentGame = new HangedGame();
-                sendMessageToClients("[GAME] Nuevo refrán: " + currentGame.getCurrentSaying().getHiddenSaying());
-            } else {
-                stopGame();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -132,10 +138,6 @@ public class GameRoom {
 
     public synchronized boolean isGameActive() {
         return currentGame != null;
-    }
-
-    public HangedGame getCurrentGame() {
-        return currentGame;
     }
 
     public String getName() {
@@ -160,14 +162,17 @@ public class GameRoom {
         }
     }
 
-    private synchronized void gameEnded(){
-        for (Worker client : clients) {
-           sendMessageToClients("[END] El juego ha terminado, tu puntuación es:" + client.getUser().getScore());
-           sendMessageToClients("[END] Crea o únete a otra sala para jugar otra partida.");
-           client.exitRoom();
+
+    private synchronized void gameEnded() {
+        List<Worker> clientsCopy = new ArrayList<>(clients);
+
+        for (Worker client : clientsCopy) {
+            sendMessageToClients("[END] El juego ha terminado, tu puntuación es: " + client.getUser().getScore());
+            client.exitRoom();
         }
 
         clients.clear();
+        currentGame = null;
     }
 
     public int getNecessaryClients() {
@@ -177,6 +182,11 @@ public class GameRoom {
     public synchronized void removePlayer(Worker worker) {
         clients.remove(worker);
 
+        if(gameEnded){
+            sendMessageToClients("[END] La sala se va a cerrar, para jugar otra partida crea o únete a una nueva.");
+            return;
+        }
+
         User user = worker.getUser();
         if(isGameActive() && clients.size() < necessaryClients){
             sendMessageToClients("[REMOVE] El usuario " + user.getUsername() + " ha salido de la sala, no hay jugadores suficientes para continuar la partida" );
@@ -185,5 +195,28 @@ public class GameRoom {
             sendMessageToClients("[REMOVE] El usuario " + user.getUsername() + " ha salido de la sala.");
             showRemainingPlayers();
         }
+    }
+
+
+    private synchronized void nextTurn() {
+        if (clients.size() > 1) {
+            currentTurnIndex = (currentTurnIndex + 1) % clients.size();
+            notifyCurrentTurn();
+        }
+    }
+
+    private synchronized void notifyCurrentTurn() {
+        if (necessaryClients > 1) {
+            Worker currentPlayer = clients.get(currentTurnIndex);
+            sendMessageToClients("[TURN] Es el turno de " + currentPlayer.getUser().getUsername());
+        }
+    }
+
+    private synchronized boolean isPlayerTurn(Worker sender) {
+        if (necessaryClients > 1 && !clients.get(currentTurnIndex).equals(sender)) {
+            sender.getMessageService().send("[WAIT] No es tu turno.");
+            return false;
+        }
+        return true;
     }
 }

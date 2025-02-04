@@ -52,6 +52,10 @@ public class MessageService {
         send("Has abandonado la sala.");
     }
 
+    public void sendUserLogOut(){
+        send("Te has desconectado del servidor.");
+    }
+
     public void send(String msg) {
         try {
             String userId = user == null ? "" : user.getId();

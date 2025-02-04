@@ -17,9 +17,13 @@ public class GameCommand implements Command {
 
     @Override
     public void execute(String[] args, Worker worker) {
-        if (args == null || args.length < 1) {
+        if ((args == null || args.length < 1) && !worker.isPlaying()) {
             worker.getMessageService().send(getCommandUsage());
             return;
+        }
+
+        if(!worker.getUser().isAuthenticated()){
+            worker.getMessageService().send("No estas autenticado, registrate o inicia sesión.");
         }
 
         String type = args[0];

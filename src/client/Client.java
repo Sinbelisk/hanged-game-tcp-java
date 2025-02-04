@@ -51,15 +51,16 @@ public class Client {
                 if (line != null) {
                     connection.send(line);
                     logger.info("Sent to server: " + line);
+
                     if (line.equalsIgnoreCase("/exit")) {
-                        logger.info("EXIT command received, closing connection.");
+                        logger.info("Terminando conexión.");
                         break;
                     }
                 }
             }
 
             connection.close();
-            logger.info("Connection closed.");
+            logger.info("Conexión con el servidor terminada.");
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error connecting to server at " + host + ":" + port, e);

@@ -17,6 +17,7 @@ public class CommandFactory {
         this.serverServices = serverServices;
 
         commandMap.put("/login", LoginCommand.class);
+        commandMap.put("/exit", ExitCommand.class);
         commandMap.put("/register", RegisterCommand.class);
         commandMap.put("/vowel", VowelCommand.class);
         commandMap.put("/consonant", ConsonantCommand.class);
