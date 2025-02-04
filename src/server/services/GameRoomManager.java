@@ -24,7 +24,7 @@ public class GameRoomManager {
     public synchronized void checkAndStartGame(String roomName){
         GameRoom room = activeRooms.get(roomName);
 
-        if (room != null && !room.isGameActive() && room.getClients().size() >= room.getNecessaryClients()) {
+        if (room != null && !room.isGameActive() && room.getRemainingPlayers() == 0) {
             room.startGame();
         }
     }

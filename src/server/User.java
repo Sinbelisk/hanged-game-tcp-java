@@ -11,7 +11,10 @@ public class User implements Serializable {
     private final String id;
     private int tries;
     private boolean authenticated;
+
     private int totalScore = 0;
+    private int wins = 0;
+    private int loses = 0;
 
     public User(String username, String password, String id) {
         this.username = username;
@@ -33,7 +36,7 @@ public class User implements Serializable {
         return tries;
     }
 
-    public int getScore() {
+    public int getRoundScore() {
         int score = 0;
 
         if(tries < 5) score = 150;
@@ -56,12 +59,28 @@ public class User implements Serializable {
         tries++;
     }
 
+    public String getStats(){
+        return String.format("[%s] Tus estadísticas son: <Victorias: %d> <Derrotas: %d> <Puntuación total: %d> ", username, wins, loses, totalScore);
+    }
+
+    public void addWin(){
+        wins++;
+    }
+
+    public void addLoss(){
+        loses++;
+    }
+
     public boolean isAuthenticated() {
         return authenticated;
     }
 
     public void setAuthenticated(boolean aut) {
         authenticated = aut;
+    }
+
+    public void resetTries(){
+        tries = 0;
     }
 }
 

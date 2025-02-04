@@ -13,6 +13,10 @@ public class LoginCommand implements Command {
 
     @Override
     public void execute(String[] elements, Worker worker) {
+        if (elements.length < 2) {
+            worker.getMessageService().send("Necesitas especificar un usuario y contraseña");
+        }
+
         String username = elements[0];
         String password = elements[1];
 

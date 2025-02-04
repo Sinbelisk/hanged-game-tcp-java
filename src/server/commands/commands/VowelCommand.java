@@ -3,7 +3,6 @@ package server.commands.commands;
 import server.Worker;
 import server.commands.Command;
 import server.game.GameRoom;
-import server.services.GameRoomManager;
 import server.services.ServiceRegistry;
 
 public class VowelCommand implements Command {
@@ -18,7 +17,7 @@ public class VowelCommand implements Command {
             return;
         }
 
-        room.guessVowel(worker, vowel);
+        room.guessLetter(worker, vowel, true);
     }
 
     @Override

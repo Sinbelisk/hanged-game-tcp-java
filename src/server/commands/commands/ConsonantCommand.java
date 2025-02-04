@@ -17,7 +17,7 @@ public class ConsonantCommand implements Command {
             return;
         }
 
-        room.guessConsonant(worker, consonant);
+        room.guessLetter(worker, consonant, false);
     }
 
     @Override
