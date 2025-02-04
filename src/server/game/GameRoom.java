@@ -55,7 +55,7 @@ public class GameRoom {
             clients.add(client);
             scoreMap.put(client, new ScoreManager());
 
-            broadcast("[JOIN] " + client.getUser().getUsername() + " se ha unido a la sala.");
+            broadcastExclude("[JOIN] " + client.getUser().getUsername() + " se ha unido a la sala.", client);
             checkStartConditions();
         } else {
             messageService.send("Ya estás en esta sala.", client);
@@ -197,6 +197,12 @@ public class GameRoom {
 
     private synchronized void broadcast(String message) {
         clients.forEach(client -> messageService.send(message, client));
+    }
+
+    private synchronized void broadcastExclude(String message, Worker excluded) {
+        clients.stream()
+                .filter(clients -> clients.equals(excluded))
+                .forEach(client -> messageService.send(message, client));
     }
 
     private synchronized void checkStartConditions() {

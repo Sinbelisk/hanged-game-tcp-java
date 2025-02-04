@@ -102,7 +102,7 @@ public class GameCommand extends AbstractCommand{
     private String getCommandUsage() {
         return """
                 /game <args>
-                
+                ----------------------------------------------------------------------------------------
                 Argumentos válidos:
                 create <name>: crea una nueva sala, son necesarios 3 jugadores para comenzar la partida.
                 enter <name>: entra en una sala ya existente.
