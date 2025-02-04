@@ -2,11 +2,7 @@ package server.commands;
 
 import server.commands.commands.*;
 import server.services.ServiceRegistry;
-import util.SimpleLogger;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
+import server.util.SimpleLogger;
 
 import java.util.HashMap;
 import java.util.Map;

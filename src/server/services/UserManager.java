@@ -1,17 +1,11 @@
 package server.services;
 
 import server.game.User;
-import util.SimpleLogger;
+import server.util.SimpleLogger;
 
 import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
 
-import java.io.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
-
-import java.nio.file.Paths;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**

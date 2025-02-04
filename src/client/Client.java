@@ -2,24 +2,14 @@ package client;
 
 import common.Connection;
 import common.SocketConnection;
-import util.SimpleLogger;
+import server.util.SimpleLogger;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.Scanner;
 import java.util.logging.Level;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Client {
     private static final Logger logger = SimpleLogger.getInstance().getLogger(Client.class);

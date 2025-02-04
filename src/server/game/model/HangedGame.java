@@ -1,7 +1,7 @@
 package server.game.model;
 
-import util.SayingUtils;
-import util.SimpleLogger;
+import server.util.SayingUtils;
+import server.util.SimpleLogger;
 
 import java.io.IOException;
 import java.util.ArrayList;

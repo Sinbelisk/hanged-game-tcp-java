@@ -3,7 +3,7 @@ package server.services;
 import server.Worker;
 import server.commands.Command;
 import server.commands.CommandFactory;
-import util.SimpleLogger;
+import server.util.SimpleLogger;
 
 import java.util.logging.Logger;
 

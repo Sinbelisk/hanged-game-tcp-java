@@ -3,7 +3,7 @@ package server.game;
 import server.Worker;
 import server.game.model.HangedGame;
 import server.services.MessageService;
-import util.SayingUtils;
+import server.util.SayingUtils;
 
 import java.util.Comparator;
 import java.util.List;
