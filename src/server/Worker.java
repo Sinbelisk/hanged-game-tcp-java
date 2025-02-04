@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Logger;
 
-public class Worker extends Thread{
+public class Worker extends Thread {
     private final Socket clientSocket;
     private User user = null;
     private boolean running = true;
@@ -102,4 +102,5 @@ public class Worker extends Thread{
     public boolean isPlaying(){
         return currentRoom != null;
     }
+
 }

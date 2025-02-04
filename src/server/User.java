@@ -9,44 +9,51 @@ public class User implements Serializable {
     private final String username;
     private final String password;
     private final String id;
-    private int wins;
-    private int losses;
-    private int score;
+    private int tries;
     private boolean authenticated;
 
     public User(String username, String password, String id) {
         this.username = username;
         this.password = password;
-        this.wins = 0;
-        this.losses = 0;
-        this.score = 0;
+        this.tries = 0;
         authenticated = false;
         this.id = id;
     }
 
-    public String getUsername() { return username; }
-    public String getPassword() { return password; }
-    public int getWins() { return wins; }
-    public int getLosses() { return losses; }
-    public int getScore() { return score; }
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public int getTries() {
+        return tries;
+    }
+
+    public int getScore() {
+        int score = 0;
+
+        if(tries < 5) score = 150;
+        else if (tries <= 8) score = 100;
+        else if (tries <= 11) score = 70;
+        else if (tries <= 15) score = 50;
+
+        return score;
+    }
+
     public String getId() {
         return id == null ? "" : id;
     }
 
-    public void addWin(int points) {
-        wins++;
-        score += points;
+    public void addTry() {
+        tries++;
     }
 
-    public void addLoss() {
-        losses++;
+    public boolean isAuthenticated() {
+        return authenticated;
     }
-
-    public String getStats() {
-        return "Victorias: " + wins + ", Derrotas: " + losses + ", Puntuación: " + score;
-    }
-
-    public boolean isAuthenticated() { return authenticated; }
 
     public void setAuthenticated(boolean aut) {
         authenticated = aut;

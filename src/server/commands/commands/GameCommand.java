@@ -5,7 +5,6 @@ import server.commands.Command;
 import server.game.GameRoom;
 import server.services.GameRoomManager;
 import server.services.ServiceRegistry;
-import server.services.UserManager;
 
 public class GameCommand implements Command {
     private GameRoomManager gameRoomManager;

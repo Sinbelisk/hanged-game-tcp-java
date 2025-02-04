@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class GameRoomManager {
 
-    private ConcurrentMap<String, GameRoom> activeRooms = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, GameRoom> activeRooms = new ConcurrentHashMap<>();
 
     public GameRoomManager() {
 

@@ -54,7 +54,7 @@ public class Server {
         }
     }
     public static void main(String[] args) {
-        Server server = new Server(8080, 10);
+        Server server = new Server(2050, 10);
         server.start();
     }
 }

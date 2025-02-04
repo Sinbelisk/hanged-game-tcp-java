@@ -15,7 +15,6 @@ public class GameRoom {
 
     private final String name;
     private final List<Worker> clients;
-    private final boolean singlePlayer;
     private final int necessaryClients;
     private HangedGame currentGame;
 
@@ -23,7 +22,6 @@ public class GameRoom {
         necessaryClients = singlePlayer ? SINGLE_PLAYER_CLIENT : DEFAULT_CLIENTS;
         this.name = name;
         this.clients = Collections.synchronizedList(new ArrayList<>(necessaryClients));
-        this.singlePlayer = singlePlayer;
     }
 
     public synchronized boolean startGame() {
@@ -75,6 +73,9 @@ public class GameRoom {
     public synchronized void guessVowel(Worker sender, char vowel) {
         if (currentGame != null) {
             boolean correct = currentGame.tryVowel(vowel);
+            if (!correct) {
+                sender.getUser().addTry();
+            }
             sendMessageToClients("[GUESS] " + sender.getUser().getUsername() + " ha intentado la vocal '" + vowel + "'. " + (correct ? "[OK] Correcta!" : "[X] Incorrecta."));
             checkGameStatus();
         }
@@ -90,9 +91,16 @@ public class GameRoom {
 
     private void checkGameStatus() {
         showCurrentProverb();
+        showCurrentScore();
         if (currentGame != null && currentGame.isGameCompleted()) {
             sendMessageToClients("[WIN] ¡El refrán fue adivinado! Era: " + currentGame.getCurrentSaying().getSaying());
             nextRound();
+        }
+    }
+
+    private void showCurrentScore() {
+        for (Worker client : clients) {
+            sendMessageToClients("[SCORE] Tu puntuación actual: " + client.getUser().getScore());
         }
     }
 
@@ -149,6 +157,12 @@ public class GameRoom {
     private synchronized void sendMessageToClients(String message) {
         for (Worker client : clients) {
             client.getMessageService().send(message);
+        }
+    }
+
+    private synchronized void gameEnded(){
+        for (Worker client : clients) {
+           sendMessageToClients("[END] El juego ha terminado, tu puntuación es:" + client.getUser().getScore());
         }
     }
 
