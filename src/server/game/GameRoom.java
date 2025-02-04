@@ -5,11 +5,14 @@ import server.game.model.HangedGame;
 import server.services.MessageService;
 import util.SayingUtils;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Collections;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class GameRoom {
@@ -18,106 +21,128 @@ public class GameRoom {
 
     private final String name;
     private final List<Worker> clients;
+    private final ConcurrentMap<Worker, ScoreManager> scoreMap;
     private final int necessaryClients;
-    private HangedGame currentGame;
+    private final MessageService messageService;
 
+    private HangedGame currentGame;
     private int currentTurnIndex = 0;
 
-    private final MessageService messageService;
+    private User winner;
 
     public GameRoom(String name, boolean singlePlayer, MessageService messageService) {
         this.name = name;
         this.necessaryClients = singlePlayer ? SINGLE_PLAYER_CLIENT : DEFAULT_CLIENTS;
-        this.clients = Collections.synchronizedList(new ArrayList<>(necessaryClients));
+        this.clients = new CopyOnWriteArrayList<>();
         this.messageService = messageService;
+        this.scoreMap = new ConcurrentHashMap<>();
     }
 
-    public synchronized boolean startGame() {
+    public synchronized void startGame() {
         if (currentGame == null && clients.size() >= necessaryClients) {
             try {
                 currentGame = new HangedGame(SayingUtils.getWordsFromDocumentName("seasy"));
                 broadcast("[GAME] El juego ha comenzado.");
-                showCurrentProverb();
-                notifyCurrentTurn();
-                return true;
+                updateGameState();
             } catch (IOException e) {
-                e.printStackTrace();
-                broadcast("[ERROR] Error al iniciar la partida.");
+                broadcast("[ERROR] Error al iniciar la partida: " + e.getMessage());
             }
         }
-        return false;
     }
 
     public synchronized void addPlayer(Worker client) {
-        if (clients.contains(client)) {
-            messageService.send("Ya estás en esta sala.", client);
-            return;
-        }
-        clients.add(client);
-        broadcast("[JOIN] " + client.getUser().getUsername() + " se ha unido a la sala.");
-        if (clients.size() >= necessaryClients) {
-            startGame();
+        if (!clients.contains(client)) {
+            clients.add(client);
+            scoreMap.put(client, new ScoreManager());
+
+            broadcast("[JOIN] " + client.getUser().getUsername() + " se ha unido a la sala.");
+            checkStartConditions();
         } else {
-            broadcast("[WAIT] Faltan " + getRemainingPlayers() + " jugadores para comenzar.");
+            messageService.send("Ya estás en esta sala.", client);
         }
     }
 
     public synchronized void guessLetter(Worker sender, char letter, boolean isVowel) {
-        if (!isPlayerTurn(sender) || currentGame == null) return;
+        if (!isGameReady(sender)) return;
 
         boolean correct = isVowel ? currentGame.tryVowel(letter) : currentGame.tryConsonant(letter);
-        if (!correct && isVowel) sender.getUser().addTry();
+        if (!correct && isVowel) scoreMap.get(sender).addTry();
 
-        broadcast("[GUESS] " + sender.getUser().getUsername() + " intentó '" + letter + "'. " + (correct ? "[OK] Correcta!" : "[X] Incorrecta."));
-        checkGameStatus();
-        nextTurn();
+        String message = "[GUESS] " + sender.getUser().getUsername() + " intentó '" + letter + "'. " +
+                (correct ? "[OK] Correcta!" : "[X] Incorrecta.");
+        broadcast(message);
+        updateGameState();
     }
 
     public synchronized void guessPhrase(Worker sender, String phrase) {
-        if (!isPlayerTurn(sender) || currentGame == null) return;
+        if (!isGameReady(sender)) return;
 
         boolean correct = currentGame.tryPhrase(phrase);
-        broadcast("[GUESS] " + sender.getUser().getUsername() + " intentó adivinar la frase. " + (correct ? "[WIN] ¡Acertó!" : "[X] Incorrecta."));
+        String message = "[GUESS] " + sender.getUser().getUsername() + " intentó adivinar la frase. " +
+                (correct ? "[WIN] ¡Acertó!" : "[X] Incorrecta.");
 
         if (correct) {
             sender.getUser().addWin();
-            endGame();
+            winner = sender.getUser();
+            announceWinner(sender);
         } else {
-            sender.getUser().addLoss();
-            clients.remove(sender);
-            broadcast("[LOSE] " + sender.getUser().getUsername() + " ha perdido la partida.");
-            if (clients.size() == 1) {
-                broadcast("[WIN] " + clients.get(0).getUser().getUsername() + " ha ganado con " + clients.get(0).getUser().getRoundScore() + " puntos.");
-                endGame();
-            } else {
-                nextTurn();
-            }
+            handleLoss();
         }
+
+        broadcast(message);
     }
 
-    private synchronized void checkGameStatus() {
-        showCurrentProverb();
-        if (currentGame != null && currentGame.isGameCompleted()) {
+    private synchronized void handleLoss() {
+        Worker highestScoreUser = getWinnerWithHighestScore();
+
+        clients.forEach(client -> {
+            if (!client.equals(highestScoreUser)) {
+                client.getUser().addLoss();
+            }
+        });
+
+        announceWinner(highestScoreUser);
+    }
+
+    private Worker getWinnerWithHighestScore() {
+        return scoreMap.entrySet().stream()
+                .max(Comparator.comparingInt(entry -> entry.getValue().getRoundScore()))
+                .map(Map.Entry::getKey)
+                .orElse(null);
+    }
+
+    private synchronized void updateGameState() {
+        if (currentGame == null) return;
+
+        if (currentGame.isGameCompleted()) {
             broadcast("[WIN] ¡El refrán fue adivinado! Era: " + currentGame.getCurrentSaying().getSaying());
             endGame();
+        } else {
+            showCurrentProverb();
+            nextTurn();
         }
     }
 
-    // El bug ocurre porque el codigo de verificacion que se activa al salir un jugador se activa cada vez que sale
-    // un jugador.
+    private synchronized boolean isGameReady(Worker sender) {
+        return isPlayerTurn(sender) && currentGame != null;
+    }
+
+    private synchronized void announceWinner(Worker winner) {
+        clients.forEach(client -> {
+            String message = client.equals(winner)
+                    ? "[WIN] ¡Has ganado con " + scoreMap.get(winner).getRoundScore() + " puntos!"
+                    : "[WIN] " + winner.getUser().getUsername() + " ha ganado con " + scoreMap.get(winner).getRoundScore() + " puntos.";
+            messageService.send(message, client);
+        });
+        endGame();
+    }
 
     public synchronized void removePlayer(Worker worker) {
         clients.remove(worker);
-        worker.getUser().resetTries();
+        scoreMap.remove(worker);
+        broadcast("[REMOVE] " + worker.getUser().getUsername() + " ha salido de la sala.");
 
-        if(isGameActive() && clients.size() > 1){
-            broadcast("[REMOVE] " + worker.getUser().getUsername() + " ha salido de la sala.");
-        }
-
-        if (clients.isEmpty()) {
-            endGame();
-        }
-        else if (isGameActive() && clients.size() < necessaryClients) {
+        if (clients.size() < necessaryClients && currentGame != null) {
             broadcast("[REMOVE] No hay jugadores suficientes para continuar la partida.");
             endGame();
         }
@@ -125,18 +150,21 @@ public class GameRoom {
 
     private synchronized void endGame() {
         currentGame = null;
-        clients.forEach(client -> {
-            broadcast("[END] Tu puntuación es: " + client.getUser().getRoundScore());
-            client.getUser().addScore(client.getUser().getRoundScore());
+        currentTurnIndex = 0;
+
+        for (Worker client : clients) {
+            int score = (client.getUser() == winner) ? scoreMap.get(client).getRoundScore() : 0;
+
+            if(client.getUser() != winner) broadcast("[END] Tu puntuación es: " + score);
+
+            client.getUser().sumScore(score);
             broadcast(client.getUser().getStats());
-            broadcast("[END] La sala se va a cerrar. Para jugar otra partida, crea o únete a una nueva.");
+
             client.exitRoom();
-        });
+        }
 
         clients.clear();
-
     }
-
 
     private synchronized void nextTurn() {
         if (clients.size() > 1) {
@@ -146,9 +174,13 @@ public class GameRoom {
     }
 
     private synchronized void notifyCurrentTurn() {
-        if (necessaryClients > 1) {
-            broadcast("[TURN] Es el turno de " + clients.get(currentTurnIndex).getUser().getUsername());
-        }
+        Worker currentPlayer = clients.get(currentTurnIndex);
+        clients.forEach(client -> {
+            String message = client.equals(currentPlayer)
+                    ? "[TURN] Es tu turno."
+                    : "[TURN] Es el turno de " + currentPlayer.getUser().getUsername();
+            messageService.send(message, client);
+        });
     }
 
     private synchronized boolean isPlayerTurn(Worker sender) {
@@ -164,7 +196,15 @@ public class GameRoom {
     }
 
     private synchronized void broadcast(String message) {
-        clients.forEach(client -> {messageService.send(message, client);});
+        clients.forEach(client -> messageService.send(message, client));
+    }
+
+    private synchronized void checkStartConditions() {
+        if (clients.size() >= necessaryClients) {
+            startGame();
+        } else {
+            broadcast("[WAIT] Faltan " + getRemainingPlayers() + " jugadores para comenzar.");
+        }
     }
 
     public synchronized int getRemainingPlayers() {

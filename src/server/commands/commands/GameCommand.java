@@ -83,13 +83,14 @@ public class GameCommand extends AbstractCommand{
     }
 
     private void startSoloGame(Worker worker) {
-        worker.setCurrentRoom(new GameRoom("Solo", true, messageService));
         messageService.send("Partida de un solo jugador iniciada.", worker);
+        worker.setCurrentRoom(new GameRoom("Solo", true, messageService));
     }
 
     private void enterRoom(Worker worker, GameRoom room) {
-        worker.setCurrentRoom(room);
         messageService.send("Has entrado en la sala " + room.getName(), worker);
+        worker.setCurrentRoom(room);
+
     }
 
     @Override
