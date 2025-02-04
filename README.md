@@ -34,6 +34,9 @@ Esto abrirá el servidor, por defecto se abre en el puerto **2050**
    ```
 Reemplaza <ip> con la dirección IP del servidor (por ejemplo, `127.0.0.1` o `localhost` si está en la misma máquina)
 
+### 🔹 Cliente
+Si ejecutas la aplicación desde un IDE recuerda activar las instancias múltiples para poder ejecutar varios clientes al mismo tiempo.
+
 ## 💻 Comandos Disponibles
 
 ### 🔹 Comandos de Usuario
