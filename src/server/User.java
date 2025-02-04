@@ -11,6 +11,7 @@ public class User implements Serializable {
     private final String id;
     private int tries;
     private boolean authenticated;
+    private int totalScore = 0;
 
     public User(String username, String password, String id) {
         this.username = username;
@@ -41,6 +42,10 @@ public class User implements Serializable {
         else if (tries <= 15) score = 50;
 
         return score;
+    }
+
+    public void addScore(int score) {
+        totalScore += score;
     }
 
     public String getId() {

@@ -1,7 +1,6 @@
 package server;
 
 import server.services.ServiceRegistry;
-import server.services.WorkerManager;
 import util.SimpleLogger;
 
 import java.io.IOException;
@@ -42,7 +41,6 @@ public class Server {
                         logger.info("Accepted connection from " + clientSocket.getInetAddress());
                         Worker thread = new Worker(clientSocket, services);
                         pool.execute(thread);
-                        services.getService(WorkerManager.class).addWorker(thread);
                     }
 
                 } catch (IOException e) {

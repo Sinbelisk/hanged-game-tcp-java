@@ -11,7 +11,6 @@ public class ServiceRegistry {
 
     public ServiceRegistry() {
         registerService(UserManager.class, new UserManager());
-        registerService(WorkerManager.class, new WorkerManager());
         registerService(CommandFactory.class, new CommandFactory(this));
         registerService(GameRoomManager.class, new GameRoomManager());
     }
