@@ -32,6 +32,7 @@ public class CommandFactory {
 
         // Mapeo de los comandos
         commandMap.put("/login", LoginCommand.class);
+        commandMap.put("/help", HelpCommand.class);
         commandMap.put("/exit", ExitCommand.class);
         commandMap.put("/register", RegisterCommand.class);
         commandMap.put("/vowel", VowelCommand.class);

@@ -89,7 +89,7 @@ public class GameRoom {
     public synchronized void startGame() {
         if (currentGame == null && clients.size() >= necessaryClients) {
             try {
-                currentGame = new HangedGame(SayingUtils.getWordsFromDocumentName("seasy"));
+                currentGame = new HangedGame(SayingUtils.getWordsFromDocumentName("easy"));
                 broadcast("[GAME] El juego ha comenzado.");
                 updateGameState();
             } catch (IOException e) {
@@ -146,6 +146,7 @@ public class GameRoom {
 
         if (correct) {
             sender.getUser().addWin();
+
             winner = sender.getUser();
             announceWinner(sender);
         } else {
@@ -245,6 +246,7 @@ public class GameRoom {
         for (Worker client : clients) {
             int score = (client.getUser() == winner) ? scoreMap.get(client).getRoundScore() : 0;
 
+            // Esta cosa dice que el ganador en multijugador tiene 0 puntos pero luego en el total salen los adecuados, que
             if(client.getUser() != winner) broadcast("[END] Tu puntuación es: " + score);
 
             client.getUser().sumScore(score);
