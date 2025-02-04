@@ -58,8 +58,6 @@ public class MessageService {
 
     public void send(String msg) {
         try {
-            String userId = user == null ? "" : user.getId();
-            logger.info("Enviando mensaje a " + userId + ": " + msg);
             connection.send(msg);
         } catch (Exception e) {
             logger.severe("Error al enviar mensaje: " + e.getMessage());

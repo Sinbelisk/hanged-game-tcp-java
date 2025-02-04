@@ -21,7 +21,7 @@ public class RegisterCommand implements Command {
         String name = elements[0];
         String password = elements[1];
 
-        User newUser = new User(name, password, StringUtils.getUserId(worker.getClientSocket(), name));
+        User newUser = new User(name, password);
 
         boolean result = userManager.registerUser(newUser);
         if (result) {

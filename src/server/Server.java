@@ -25,32 +25,38 @@ public class Server {
         services = new ServiceRegistry();
     }
 
-    public Server(int port) {
-        this(port, DEFAULT_POOL_SIZE);
-    }
-
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            logger.info("Server started on port: " + port);  // Log en lugar de println
+            logger.info("Servidor iniciado en el puerto: " + port);
 
             while (running) {
                 try {
                     Socket clientSocket = serverSocket.accept();
 
                     if (clientSocket != null && !clientSocket.isClosed()) {
-                        logger.info("Accepted connection from " + clientSocket.getInetAddress());
+                        logger.info("Conexión aceptada de: " + clientSocket.getInetAddress());
+
                         Worker thread = new Worker(clientSocket, services);
+                        thread.setName(generateThreadId(clientSocket));
                         pool.execute(thread);
                     }
 
                 } catch (IOException e) {
-                    logger.severe("Error accepting client connection: " + e.getMessage());
+                    logger.severe("Error al aceptar la conexión de cliente: " + e.getMessage());
                 }
             }
         } catch (IOException e) {
-            logger.severe("Error starting server on port " + port + ": " + e.getMessage());
+            logger.severe("Error al iniciar servidor en el puerto: " + port + ": " + e.getMessage());
         }
     }
+
+    private String generateThreadId(Socket socket) {
+        String address = socket.getInetAddress().getHostAddress();
+        int port = socket.getPort();
+        return address + ":" + port;
+    }
+
+
     public static void main(String[] args) {
         Server server = new Server(2050, 10);
         server.start();

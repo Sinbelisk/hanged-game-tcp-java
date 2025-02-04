@@ -14,10 +14,18 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.util.logging.Level;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class Client {
     private static final Logger logger = SimpleLogger.getInstance().getLogger(Client.class);
     private final String host;
     private final int port;
+    private volatile boolean running = true; // Controla la ejecución del hilo de lectura
 
     public Client(String host, int port) {
         this.host = host;
@@ -25,35 +33,26 @@ public class Client {
     }
 
     public void connect() {
-        try (Socket socket = new Socket(host, port)) {
-            logger.info("Connected to server at " + host + ":" + port);
+        try (Socket socket = new Socket(host, port);
+             Scanner scanner = new Scanner(System.in)) {
+            logger.info("Conexión al servidor " + host + ":" + port);
             Connection connection = new SocketConnection(socket);
             connection.open();
-            logger.info("Connection opened.");
+            logger.info("Conexión abierta, esperando mensajes");
 
-            // Thread to receive messages from the server
-            Thread readerThread = new Thread(() -> {
-                try {
-                    String response;
-                    while ((response = connection.receive()) != null) {
-                        System.out.println("Server: " + response);
-                    }
-                } catch (IOException e) {
-                    logger.log(Level.WARNING, "Error receiving message: " + e.getMessage(), e);
-                }
-            });
+            // Iniciar el hilo de escucha
+            Thread readerThread = new Thread(() -> listenToServer(connection));
             readerThread.start();
 
-            Scanner scanner = new Scanner(System.in);
-            logger.info("Enter your commands:");
-            while (socket.isConnected() && !socket.isClosed()) {
+            logger.info("Ya se pueden introducir comandos:");
+            while (running && socket.isConnected() && !socket.isClosed()) {
                 String line = scanner.nextLine();
                 if (line != null) {
                     connection.send(line);
-                    logger.info("Sent to server: " + line);
 
                     if (line.equalsIgnoreCase("/exit")) {
-                        logger.info("Terminando conexión.");
+                        logger.info("Terminando conexión...");
+                        running = false;
                         break;
                     }
                 }
@@ -61,15 +60,28 @@ public class Client {
 
             connection.close();
             logger.info("Conexión con el servidor terminada.");
+            readerThread.join();
 
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error connecting to server at " + host + ":" + port, e);
+        } catch (IOException | InterruptedException e) {
+            logger.log(Level.SEVERE, "Error al conectarse al servidor " + host + ":" + port, e);
+            Thread.currentThread().interrupt();
         }
     }
 
-    public static void main(String[] args) {
-        Client client = new Client("localhost", 2050);
-        client.connect();
+    private void listenToServer(Connection connection) {
+        try {
+            String response;
+            while (running && (response = connection.receive()) != null) {
+                System.out.println("Server: " + response);
+            }
+        } catch (IOException e) {
+            if (running) {
+                logger.log(Level.WARNING, "Error al recibir mensaje: " + e.getMessage(), e);
+            }
+        } finally {
+            running = false;
+        }
     }
 }
+
 

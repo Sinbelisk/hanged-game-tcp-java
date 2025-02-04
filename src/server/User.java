@@ -8,7 +8,6 @@ import java.io.Serializable;
 public class User implements Serializable {
     private final String username;
     private final String password;
-    private final String id;
     private int tries;
     private boolean authenticated;
 
@@ -16,12 +15,11 @@ public class User implements Serializable {
     private int wins = 0;
     private int loses = 0;
 
-    public User(String username, String password, String id) {
+    public User(String username, String password) {
         this.username = username;
         this.password = password;
         this.tries = 0;
         authenticated = false;
-        this.id = id;
     }
 
     public String getUsername() {
@@ -49,10 +47,6 @@ public class User implements Serializable {
 
     public void addScore(int score) {
         totalScore += score;
-    }
-
-    public String getId() {
-        return id == null ? "" : id;
     }
 
     public void addTry() {
