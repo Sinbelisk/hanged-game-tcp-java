@@ -16,13 +16,13 @@ public class GameCommand extends AbstractCommand{
 
     @Override
     public void execute(String[] args, Worker worker) {
+        if(!isUserAuthenticated(worker)){
+            messageService.sendUserMustAuth(worker);
+        }
+
         if ((args == null || args.length < 1) && !worker.isPlaying()) {
             messageService.send(getCommandUsage(), worker);
             return;
-        }
-
-        if(!worker.getUser().isAuthenticated()){
-            messageService.send("No estas autenticado, registrate o inicia sesión.", worker);
         }
 
         String type = args[0];

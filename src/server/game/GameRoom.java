@@ -1,6 +1,7 @@
 package server.game;
 
 import server.Worker;
+import server.game.model.HangedGame;
 import server.services.MessageService;
 import util.SayingUtils;
 

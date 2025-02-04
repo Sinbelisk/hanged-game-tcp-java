@@ -4,7 +4,6 @@ import server.Worker;
 import server.commands.Command;
 import server.commands.CommandFactory;
 import util.SimpleLogger;
-import util.StringUtils;
 
 import java.util.logging.Logger;
 
@@ -39,9 +38,17 @@ public class CommandManager {
         return commandFactory.createCommand(commandName);
     }
 
+    public String[] parseArguments(String[] strings){
+        int size = strings.length - 1;
+        String[] parsedStrings = new String[size];
+        System.arraycopy(strings, 1, parsedStrings, 0, size);
+
+        return parsedStrings;
+    }
+
     private void executeCommand(Command command, String[] args, Worker worker) {
         command.assingServices(services);
-        command.execute(StringUtils.parseArguments(args), worker);
+        command.execute(parseArguments(args), worker);
         logger.info("[" + Thread.currentThread().getName() + "] Comando ejecutado: " + args[0]);
     }
 }

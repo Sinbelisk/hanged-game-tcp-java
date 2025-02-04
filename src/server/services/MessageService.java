@@ -16,6 +16,10 @@ public class MessageService {
         send("Error: comando desconocido, usa '/help' para ver la lista de comandos disponibles", worker);
     }
 
+    public void sendUserMustAuth(Worker worker) {
+        send("Error: debes iniciar sesión o registrarte para realizar esa acción", worker);
+    }
+
     public void send(String msg, Worker worker) {
         try {
             worker.getConnection().send(msg);

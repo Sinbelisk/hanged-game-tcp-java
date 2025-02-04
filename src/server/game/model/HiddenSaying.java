@@ -1,4 +1,4 @@
-package server.game;
+package server.game.model;
 
 import java.util.List;
 

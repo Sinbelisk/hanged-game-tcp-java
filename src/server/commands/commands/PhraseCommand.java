@@ -9,6 +9,10 @@ public class PhraseCommand extends AbstractCommand {
 
     @Override
     public void execute(String[] args, Worker worker) {
+        if(!isUserAuthenticated(worker)){
+            messageService.sendUserMustAuth(worker);
+        }
+
         String phrase = String.join(" ", args);
 
         GameRoom room = worker.getCurrentRoom();
