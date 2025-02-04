@@ -165,6 +165,7 @@ public class GameRoom {
 
     private synchronized void gameEnded() {
         List<Worker> clientsCopy = new ArrayList<>(clients);
+        gameEnded = true;
 
         for (Worker client : clientsCopy) {
             sendMessageToClients("[END] El juego ha terminado, tu puntuación es: " + client.getUser().getScore());
