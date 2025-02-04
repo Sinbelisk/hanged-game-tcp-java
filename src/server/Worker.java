@@ -4,6 +4,7 @@ import common.SocketConnection;
 import server.commands.Command;
 import server.commands.CommandFactory;
 import server.game.GameRoom;
+import server.services.CommandManager;
 import server.services.GameRoomManager;
 import server.services.MessageService;
 import server.services.ServiceRegistry;
@@ -57,32 +58,8 @@ public class Worker extends Thread {
             if (received == null) break;
 
             logger.info("[" + getName() + "] Recibido mensaje: " + received);
-            processCommand(received);
+            services.getService(CommandManager.class).processCommand(received, this);
         }
-    }
-
-    private void processCommand(String received) {
-        String[] commandArgs = received.split("\\s");
-        if (commandArgs.length == 0) return;
-
-        Command command = parseCommand(commandArgs[0]);
-        if (command != null) {
-            executeCommand(command, commandArgs);
-        } else {
-            messageService.sendUnknownCommand();
-            logger.warning("[" + getName() + "] Comando desconocido: " + commandArgs[0]);
-        }
-    }
-
-    private Command parseCommand(String commandName) {
-        if (!commandName.startsWith("/")) return null;
-        return services.getService(CommandFactory.class).createCommand(commandName);
-    }
-
-    private void executeCommand(Command command, String[] args) {
-        command.assingServices(services);
-        command.execute(StringUtils.parseArguments(args), this);
-        logger.info("[" + getName() + "] Comando ejecutado: " + args[0]);
     }
 
     private void cleanup() {
